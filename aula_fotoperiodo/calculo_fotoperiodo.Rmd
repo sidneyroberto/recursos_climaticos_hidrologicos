@@ -10,10 +10,11 @@ output: html_document
 #=========================================================
 ```
 ```{r}
-# ETAPA 1 - Dados de entrada
-
-data_ref <- as.Date("2026-08-04")
-
+data_ref <- as.Date("2026-08-07")
+data_ref
+# Coordenadas de Aquidauana
+# Latitude Sul = negativa
+# Longitude Oeste = negativa
 latitude  <- -20.475556
 longitude <- -55.783889
 
@@ -26,6 +27,15 @@ fuso <- -4
 
 NDA <- as.integer(format(data_ref, "%j"))
 NDA
+
+# Número de dias do ano, bissexto ou não
+# 365 em anos comuns e 366 em anos bissextos
+ano <- format(data_ref, "%Y")
+ano
+dias_ano <- as.integer(
+  format(as.Date(paste0(ano, "-12-31")), "%j")
+)
+dias_ano
 ```
 ```{r}
 # ETAPA 3 - Declinação Solar
@@ -44,7 +54,9 @@ declinacao_graus
 # A partir daqui, os cálculos trigonométricos serão feitos em radianos.
 
 latitude_rad   <- latitude * pi / 180
+latitude_rad
 declinacao_rad <- declinacao_graus * pi / 180
+declinacao_rad
 ```
 ```{r}
 # ETAPA 5 - Ângulo horário geométrico do pôr do Sol
@@ -122,5 +134,260 @@ cat(
   "min\n"
 )
 
+```
+```{r}
+#=========================================================
+# PARTE B - MODELO CORRIGIDO SEGUNDO A NOAA
+#=========================================================
+#=========================================================
+# ETAPA 8 - ÂNGULO FRACIONÁRIO DO ANO
+#=========================================================
+# A NOAA define:
+# gamma = 2*pi/dias_ano *
+#         (NDA - 1 + (hora - 12)/24)
+#
+# Para os cálculos diários, utilizamos hora = 12.
+# Assim, o termo (hora - 12)/24 é igual a zero.
+gamma <- 2 * pi / dias_ano * (NDA - 1)
+gamma
+```
+```{r}
+#=========================================================
+# ETAPA 9 - DECLINAÇÃO SOLAR SEGUNDO A NOAA
+#=========================================================
+# Resultado diretamente em radianos
+
+declinacao_noaa_rad <-
+  0.006918 -
+  0.399912 * cos(gamma) +
+  0.070257 * sin(gamma) -
+  0.006758 * cos(2 * gamma) +
+  0.000907 * sin(2 * gamma) -
+  0.002697 * cos(3 * gamma) +
+  0.001480 * sin(3 * gamma)
+
+declinacao_noaa_rad
+
+# Converter apenas para apresentação
+declinacao_noaa_graus <-
+  declinacao_noaa_rad * 180 / pi
+declinacao_noaa_graus
+```
+```{r}
+#=========================================================
+# ETAPA 10 - EQUAÇÃO DO TEMPO
+#=========================================================
+# Resultado em minutos
+
+equacao_tempo <- 229.18 * (
+  0.000075 +
+    0.001868 * cos(gamma) -
+    0.032077 * sin(gamma) -
+    0.014615 * cos(2 * gamma) -
+    0.040849 * sin(2 * gamma)
+)
+equacao_tempo
+```
+```{r}
+#=========================================================
+# ETAPA 11 - ÂNGULO HORÁRIO CORRIGIDO
+#=========================================================
+# Para nascer e pôr do Sol, a NOAA utiliza
+# ângulo zenital de 90,833 graus.
+# Esse valor considera aproximadamente:
+# - refração atmosférica;
+# - tamanho aparente do disco solar.
+
+zenite_rad <- 90.833 * pi / 180
+
+angulo_corrigido_rad <- acos(
+  cos(zenite_rad) /
+    (cos(latitude_rad) * cos(declinacao_noaa_rad)) -
+    tan(latitude_rad) * tan(declinacao_noaa_rad)
+)
+
+# Converter para graus
+angulo_corrigido_graus <-
+  angulo_corrigido_rad * 180 / pi
+angulo_corrigido_graus
+```
+```{r}
+#=========================================================
+# ETAPA 12 - MEIO-DIA SOLAR
+#=========================================================
+# A NOAA calcula primeiro o meio-dia solar em UTC:
+# MDS_UTC = 720 - 4*longitude - equacao_tempo
+# Para obter o horário oficial local,
+# acrescentamos 60*fuso.
+meio_dia_solar_min <-
+  720 -
+  4 * longitude -
+  equacao_tempo +
+  60 * fuso
+meio_dia_solar_min
+
+
+# Converter para horas decimais
+meio_dia_solar_decimal <-
+  meio_dia_solar_min / 60
+meio_dia_solar_decimal
+
+# Converter para horas e minutos
+meio_dia_solar_h <-floor(meio_dia_solar_decimal)
+meio_dia_solar_m <- round(
+  (meio_dia_solar_decimal -
+     meio_dia_solar_h) * 60
+)
+
+cat(
+  "Meio-dia solar:",
+  meio_dia_solar_h,
+  "h",
+  meio_dia_solar_m,
+  "min\n"
+)
+```
+```{r}
+#=========================================================
+# ETAPA 13 - NASCER DO SOL CORRIGIDO
+#=========================================================
+# Cada grau do ângulo horário corresponde a 4 minutos.
+nascer_corrigido_min <-meio_dia_solar_min -4 * angulo_corrigido_graus
+nascer_corrigido_min
+
+nascer_corrigido_decimal <- nascer_corrigido_min / 60
+nascer_corrigido_decimal
+
+# Converter para horas e minutos
+nascer_corrigido_h <-
+  floor(nascer_corrigido_decimal)
+
+nascer_corrigido_m <- round(
+  (nascer_corrigido_decimal -
+     nascer_corrigido_h) * 60
+)
+
+cat(
+  "Nascer do Sol corrigido:",
+  nascer_corrigido_h,
+  "h",
+  nascer_corrigido_m,
+  "min\n"
+)
+```
+```{r}
+#=========================================================
+# ETAPA 14 - PÔR DO SOL CORRIGIDO
+#=========================================================
+por_corrigido_min <-
+  meio_dia_solar_min +
+  4 * angulo_corrigido_graus
+
+por_corrigido_decimal <-
+  por_corrigido_min / 60
+por_corrigido_decimal
+
+# Converter para horas e minutos
+por_corrigido_h <-
+  floor(por_corrigido_decimal)
+
+por_corrigido_m <- round(
+  (por_corrigido_decimal -
+     por_corrigido_h) * 60
+)
+
+cat(
+  "Pôr do Sol corrigido:",
+  por_corrigido_h,
+  "h",
+  por_corrigido_m,
+  "min\n"
+)
+```
+```{r}
+#=========================================================
+# ETAPA 15 - FOTOPERÍODO CORRIGIDO
+#=========================================================
+fotoperiodo_corrigido_horas <-
+  2 * angulo_corrigido_graus / 15
+fotoperiodo_corrigido_horas
+# Converter para horas e minutos
+fotoperiodo_corrigido_h <-
+  floor(fotoperiodo_corrigido_horas)
+
+fotoperiodo_corrigido_min <- round(
+  (fotoperiodo_corrigido_horas -
+     fotoperiodo_corrigido_h) * 60
+)
+
+cat(
+  "Fotoperíodo corrigido:",
+  fotoperiodo_corrigido_h,
+  "h",
+  fotoperiodo_corrigido_min,
+  "min\n"
+)
+```
+```{r}
+#=========================================================
+# ETAPA 16 - COMPARAÇÃO DOS RESULTADOS
+#=========================================================
+# sprintf() formata a saída dos resultados.
+# %02d indica que o número inteiro será apresentado
+# com dois dígitos, adicionando zero à esquerda quando necessário.
+comparacao <- data.frame(
+  Metodo = c(
+    "Geométrico simplificado",
+    "Corrigido - NOAA"
+  ),
+  
+  Nascer_do_Sol = c(
+    sprintf(
+      "%02d:%02d",
+      nascer_h,
+      nascer_min
+    ),
+    
+    sprintf(
+      "%02d:%02d",
+      nascer_corrigido_h,
+      nascer_corrigido_m
+    )
+  ),
+  
+  Por_do_Sol = c(
+    sprintf(
+      "%02d:%02d",
+      por_h,
+      por_min
+    ),
+    
+    sprintf(
+      "%02d:%02d",
+      por_corrigido_h,
+      por_corrigido_m
+    )
+  ),
+  
+  Fotoperiodo = c(
+    sprintf(
+      "%02d h %02d min",
+      fotoperiodo_h,
+      fotoperiodo_min
+    ),
+    
+    sprintf(
+      "%02d h %02d min",
+      fotoperiodo_corrigido_h,
+      fotoperiodo_corrigido_min
+    )
+  )
+)
+
+print("Fotoperíodo de Aqudauana em 07/08/2026")
+print(
+  comparacao,
+  row.names = FALSE
+)
 ```
 

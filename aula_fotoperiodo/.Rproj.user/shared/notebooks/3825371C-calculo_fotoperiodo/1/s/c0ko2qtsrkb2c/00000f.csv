@@ -1,0 +1,6 @@
+"0","# ETAPA 4 - Conversão dos ângulos de entrada para radianos"
+"0",""
+"0","# A partir daqui, os cálculos trigonométricos serão feitos em radianos."
+"0",""
+"0","latitude_rad   <- latitude * pi / 180"
+"0","declinacao_rad <- declinacao_graus * pi / 180"

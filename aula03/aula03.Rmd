@@ -1,0 +1,317 @@
+---
+title: "Solução atividade aula 03 - Sidney Sousa"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+# Carregar o pacote ggplot2
+library(ggplot2)
+```
+
+```{r}
+
+# Função para obter o dataframe com as colunas necessárias para o processamento
+obter_dataframe <- function(df) {
+  return(
+    data.frame(
+      data = df$Data,
+      hora_UTC = df$`Hora (UTC)`,
+      irradiacao_kJ_m2 = df$`Radiacao (KJ/m²)`
+    )
+  )
+}
+
+# Função para formatar um horário no padrão UTC
+converter_para_string_hora_utc <- function(hora_utc) {
+  return(
+    sprintf("%04d", hora_utc)
+  )
+}
+
+# Função para criar um objeto de hora no padrão POSIX
+converter_para_posix <- function(data, hora_utc_str) {
+  return (
+    as.POSIXct(
+      paste(
+        data,
+        hora_utc_str
+      ),
+      format = "%d/%m/%Y %H%M",
+      tz = "UTC"
+    )
+  )
+}
+
+# Função para converter um horário UTC para o horário de um timezone específico
+converter_horario_para_timezone <- function(hora_utc, timezone) {
+  return (
+    as.POSIXct(
+      format(
+        hora_utc,
+        tz = timezone
+      ),
+      tz = timezone
+    )
+  )
+}
+
+# Função para separar a data e hora local
+separar_data_hora_local <- function(data_hora_local, timezone) {
+  return (
+    as.Date(
+      data_hora_local,
+      tz = timezone
+    )
+  )
+}
+
+# Função para extrair a hora local
+extrair_hora_local <- function(data_hora_local, timezone) {
+  return (
+    as.numeric(
+      format(
+        data_hora_local,
+        format = "%H",
+        tz = timezone
+      )
+    )
+  )
+}
+
+# Função para selecionar o dia de interesse
+selecionar_dia_de_interesse <- function(df, data) {
+  return (
+    df[
+      df$data_local == as.Date(data),
+    ]
+  )
+}
+
+# Função para limpar os dados de irradiação
+limpar_dados_irradiacao <- function(df_dia) {
+  df_dia$irradiacao_kJ_m2[
+      is.na(df_dia$irradiacao_kJ_m2)
+    ] <- 0
+  
+  return (df_dia)
+}
+
+# Função para converter unidade de irradiação
+converter_unidade_irradiacao <- function (df_dia) {
+  df_dia$irradiacao_MJ_m2 <-
+    df_dia$irradiacao_kJ_m2 / 1000
+  
+  return(df_dia)
+}
+
+# Função para criar o dataframe final
+criar_dataframe_final <- function(df_dia) {
+  return (
+    data.frame(
+      data = df_dia$data_local,
+      hora = df_dia$hora_local,
+      irradiacao_MJ_m2 = df_dia$irradiacao_MJ_m2
+    )
+  )
+}
+
+# Função para calcular a irradiação solar total diária
+calcular_irradiacao_total_diaria <- function(irradiacao_dia) {
+  return (
+    sum(
+      irradiacao_dia$irradiacao_MJ_m2
+    )
+  )
+}
+
+# Função para calcular irradiações totais diárias
+calcular_irradiacoes_totais <- function(df_data1, df_data2, data1, data2, timezone) {
+  dados_data1 <- obter_dataframe(df_data1)
+  dados_data2 <- obter_dataframe(df_data2)
+  
+  dados_data1$hora_UTC_texto <- converter_para_string_hora_utc(dados_data1$hora_UTC)
+  dados_data2$hora_UTC_texto <- converter_para_string_hora_utc(dados_data2$hora_UTC)
+  
+  dados_data1$data_hora_UTC <- converter_para_posix(dados_data1$data, dados_data1$hora_UTC_texto)
+  dados_data2$data_hora_UTC <- converter_para_posix(dados_data2$data, dados_data2$hora_UTC_texto)
+  
+  dados_data1$data_hora_local <- converter_horario_para_timezone(dados_data1$data_hora_UTC, timezone)
+  dados_data2$data_hora_local <- converter_horario_para_timezone(dados_data2$data_hora_UTC, timezone)
+  
+  dados_data1$data_local <- separar_data_hora_local(dados_data1$data_hora_local, timezone)
+  dados_data2$data_local <- separar_data_hora_local(dados_data2$data_hora_local, timezone)
+  
+  dados_data1$hora_local <- extrair_hora_local(dados_data1$data_hora_local, timezone)
+  dados_data2$hora_local <- extrair_hora_local(dados_data2$data_hora_local, timezone)
+  
+  dia_data1 <- selecionar_dia_de_interesse(dados_data1, data1)
+  dia_data2 <- selecionar_dia_de_interesse(dados_data2, data2)
+  
+  dia_data1 <- limpar_dados_irradiacao(dia_data1)
+  dia_data2 <- limpar_dados_irradiacao(dia_data2)
+  
+  dia_data1 <- converter_unidade_irradiacao(dia_data1)
+  dia_data2 <- converter_unidade_irradiacao(dia_data2)
+  
+  irradiacao_data1 <- criar_dataframe_final(dia_data1)
+  irradiacao_data2 <- criar_dataframe_final(dia_data2)
+  
+  irradiacao_total_data1 <- calcular_irradiacao_total_diaria(irradiacao_data1)
+  irradiacao_total_data2 <- calcular_irradiacao_total_diaria(irradiacao_data2)
+  
+  return(list(
+      irradiacao_dia1 = irradiacao_data1, 
+      irradiacao_dia2 = irradiacao_data2, 
+      irradiacao_total_dia1 = irradiacao_total_data1, 
+      irradiacao_total_dia2 = irradiacao_total_data2
+    )
+  )
+}
+```
+
+```{r}
+# Função para gerar o gráfico da irradiação solar diária
+
+gerar_grafico_de_irradiacao_solar_diaria <- function (irradiacao_data1, irradiacao_data2, data1, data2) {
+  irradiacao_data1$dia <- data1
+  irradiacao_data2$dia <- data2
+  
+  irradiacao_dias <- rbind(
+    irradiacao_data1,
+    irradiacao_data2
+  )
+  
+  ggplot(
+    irradiacao_dias,
+    aes(  
+      x = hora,
+      y = irradiacao_MJ_m2,
+      color = dia
+    )
+  ) +
+    geom_line(linewidth = 1) + #liga os valores
+    geom_point(size = 2) +      #mostra cada observação horária
+    # Definir as cores das duas datas
+    scale_color_manual(
+      values = setNames(
+        c("red", "blue"),
+        c(data1, data2)
+      )
+    ) +
+    # Definir os valores apresentados no eixo x
+    scale_x_continuous(
+      breaks = seq(0, 23, by = 1)
+    ) +
+    
+    # Títulos dos eixos e da legenda
+    labs(
+      x = "Hora local",
+      y = "Irradiação solar horária (MJ/m²)",
+      color = "Data"
+    ) +
+    
+    # Tema do gráfico
+    theme_bw()
+}
+```
+
+```{r}
+# Parte 1 (dias de janeiro e fevereiro)
+
+arquivo1 <- "aquidauana_janeiro.csv"
+arquivo2 <- "aquidauana_fevereiro.csv"
+data1 <- "05/01/2025"
+data2 <- "26/02/2025"
+data1_padrao_global = "2025-01-05"
+data2_padrao_global <- "2025-02-26"
+timezone <- "America/Campo_Grande"
+
+mes1 <- read.csv2(
+  arquivo1,
+  header = TRUE,
+  stringsAsFactors = FALSE,
+  check.names = FALSE
+)
+mes2 <- read.csv2(
+  arquivo2,
+  header = TRUE,
+  stringsAsFactors = FALSE,
+  check.names = FALSE
+)
+
+resultados <- calcular_irradiacoes_totais(mes1, mes2, data1_padrao_global, data2_padrao_global, timezone)
+
+# Exibe as irradiações totais diárias
+cat(
+  "Irradiação total em ",
+  data1,
+  ": ",
+  round(resultados$irradiacao_total_dia1, 2),
+  "MJ/m²/dia\n"
+)
+
+cat(
+  "Irradiação total em ",
+  data2,
+  ": ",
+  round(resultados$irradiacao_total_dia2, 2),
+  "MJ/m²/dia"
+)
+
+# Gera o gráfico de irradiação solar horária
+gerar_grafico_de_irradiacao_solar_diaria(resultados$irradiacao_dia1, resultados$irradiacao_dia2, data1, data2)
+```
+
+```{r}
+# Parte 2 (dias de junho)
+
+arquivo1 <- "aquidauana_junho1.csv"
+arquivo2 <- "aquidauana_junho2.csv"
+data1 <- "08/06/2025"
+data2 <- "24/06/2025"
+data1_padrao_global = "2025-06-08"
+data2_padrao_global <- "2025-06-24"
+timezone <- "America/Campo_Grande"
+
+mes1 <- read.csv2(
+  arquivo1,
+  header = TRUE,
+  stringsAsFactors = FALSE,
+  check.names = FALSE
+)
+mes2 <- read.csv2(
+  arquivo2,
+  header = TRUE,
+  stringsAsFactors = FALSE,
+  check.names = FALSE
+)
+
+resultados <- calcular_irradiacoes_totais(mes1, mes2, data1_padrao_global, data2_padrao_global, timezone)
+
+# Exibe as irradiações totais diárias
+cat(
+  "Irradiação total em ",
+  data1,
+  ": ",
+  round(resultados$irradiacao_total_dia1, 2),
+  "MJ/m²/dia\n"
+)
+
+cat(
+  "Irradiação total em ",
+  data2,
+  ": ",
+  round(resultados$irradiacao_total_dia2, 2),
+  "MJ/m²/dia"
+)
+
+# Gera o gráfico de irradiação solar horária
+gerar_grafico_de_irradiacao_solar_diaria(resultados$irradiacao_dia1, resultados$irradiacao_dia2, data1, data2)
+```
+
+
+
+
+

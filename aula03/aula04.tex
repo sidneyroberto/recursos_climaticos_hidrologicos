@@ -1,0 +1,2227 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Script da aula 04},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Script da aula 04}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Constantes}
+\NormalTok{data1\_str }\OtherTok{=} \StringTok{"08/06/2025"}
+\NormalTok{data2\_str }\OtherTok{=} \StringTok{"24/06/2025"}
+\NormalTok{data1\_utc\_str }\OtherTok{=} \StringTok{"2025{-}06{-}08"}
+\NormalTok{data2\_utc\_str }\OtherTok{=} \StringTok{"2025{-}06{-}24"}
+\NormalTok{data1\_1\_utc\_str }\OtherTok{=} \StringTok{"2025{-}06{-}08 00:00:00"}
+\NormalTok{data1\_2\_utc\_str }\OtherTok{=} \StringTok{"2025{-}06{-}09 00:00:00"}
+\NormalTok{data2\_1\_utc\_str }\OtherTok{=} \StringTok{"2025{-}06{-}24 00:00:00"}
+\NormalTok{data2\_2\_utc\_str }\OtherTok{=} \StringTok{"2025{-}06{-}25 00:00:00"}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Importação dos bancos de dados}
+\NormalTok{data1 }\OtherTok{\textless{}{-}} \FunctionTok{read.csv2}\NormalTok{(}
+  \StringTok{"aquidauana\_junho1.csv"}\NormalTok{,}
+  \AttributeTok{header =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}\NormalTok{,}
+  \AttributeTok{check.names =} \ConstantTok{FALSE}\NormalTok{,}
+  \AttributeTok{fileEncoding =} \StringTok{"UTF{-}8{-}BOM"}
+\NormalTok{)}
+
+\CommentTok{\# Importar os dados de data2}
+\NormalTok{data2 }\OtherTok{\textless{}{-}} \FunctionTok{read.csv2}\NormalTok{(}
+  \StringTok{"aquidauana\_junho2.csv"}\NormalTok{,}
+  \AttributeTok{header =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}\NormalTok{,}
+  \AttributeTok{check.names =} \ConstantTok{FALSE}\NormalTok{,}
+  \AttributeTok{fileEncoding =} \StringTok{"UTF{-}8{-}BOM"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Selecionando as variáveis de interesse}
+
+\NormalTok{dados\_data1 }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{data =}\NormalTok{ data1}\SpecialCharTok{$}\NormalTok{Data,}
+  \AttributeTok{hora\_UTC =}\NormalTok{ data1}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Hora (UTC)}\StringTok{\textasciigrave{}}\NormalTok{,}
+  \AttributeTok{temperatura\_C =}\NormalTok{ data1}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Temp. Ins. (C)}\StringTok{\textasciigrave{}}\NormalTok{,}
+  \AttributeTok{temperatura\_max\_C =}\NormalTok{ data1}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Temp. Max. (C)}\StringTok{\textasciigrave{}}\NormalTok{,}
+  \AttributeTok{temperatura\_min\_C =}\NormalTok{ data1}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Temp. Min. (C)}\StringTok{\textasciigrave{}}\NormalTok{,}
+  \AttributeTok{ponto\_orvalho\_C =}\NormalTok{ data1}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Pto Orvalho Ins. (C)}\StringTok{\textasciigrave{}}\NormalTok{,}
+  \AttributeTok{irradiacao\_kJ\_m2 =}\NormalTok{ data1}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Radiacao (KJ/m²)}\StringTok{\textasciigrave{}}
+\NormalTok{)}
+
+\NormalTok{dados\_data2 }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{data =}\NormalTok{ data2}\SpecialCharTok{$}\NormalTok{Data,}
+  \AttributeTok{hora\_UTC =}\NormalTok{ data2}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Hora (UTC)}\StringTok{\textasciigrave{}}\NormalTok{,}
+  \AttributeTok{temperatura\_C =}\NormalTok{ data2}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Temp. Ins. (C)}\StringTok{\textasciigrave{}}\NormalTok{,}
+  \AttributeTok{temperatura\_max\_C =}\NormalTok{ data2}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Temp. Max. (C)}\StringTok{\textasciigrave{}}\NormalTok{,}
+  \AttributeTok{temperatura\_min\_C =}\NormalTok{ data2}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Temp. Min. (C)}\StringTok{\textasciigrave{}}\NormalTok{,}
+  \AttributeTok{ponto\_orvalho\_C =}\NormalTok{ data2}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Pto Orvalho Ins. (C)}\StringTok{\textasciigrave{}}\NormalTok{,}
+  \AttributeTok{irradiacao\_kJ\_m2 =}\NormalTok{ data2}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Radiacao (KJ/m²)}\StringTok{\textasciigrave{}}
+\NormalTok{)}
+
+\NormalTok{dados\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 1  08/06/2025        0          24.0              24.8              24.0
+## 2  08/06/2025      100          23.5              24.0              23.5
+## 3  08/06/2025      200          23.7              23.7              23.4
+## 4  08/06/2025      300          23.1              23.7              23.0
+## 5  08/06/2025      400          22.9              23.0              22.9
+## 6  08/06/2025      500          22.7              22.9              22.7
+## 7  08/06/2025      600          22.7              22.8              22.6
+## 8  08/06/2025      700          22.4              22.9              22.4
+## 9  08/06/2025      800          22.1              22.4              22.1
+## 10 08/06/2025      900          22.2              22.2              22.0
+## 11 08/06/2025     1000          21.9              22.3              21.9
+## 12 08/06/2025     1100          21.7              21.9              21.7
+## 13 08/06/2025     1200          22.1              22.1              21.7
+## 14 08/06/2025     1300          22.0              22.4              22.0
+## 15 08/06/2025     1400          21.9              22.2              21.5
+## 16 08/06/2025     1500          20.9              21.9              20.4
+## 17 08/06/2025     1600          21.9              22.2              20.9
+## 18 08/06/2025     1700          22.5              22.5              21.7
+## 19 08/06/2025     1800          22.3              22.6              22.3
+## 20 08/06/2025     1900          22.4              22.4              22.2
+## 21 08/06/2025     2000          22.2              22.5              22.2
+## 22 08/06/2025     2100          21.9              22.2              21.8
+## 23 08/06/2025     2200          21.7              21.9              21.6
+## 24 08/06/2025     2300          21.7              21.7              21.6
+## 25 09/06/2025        0          21.2              21.8              21.2
+## 26 09/06/2025      100          21.7              21.7              21.1
+## 27 09/06/2025      200          20.9              21.7              20.9
+## 28 09/06/2025      300          20.2              20.9              20.2
+## 29 09/06/2025      400          20.1              20.2              20.0
+## 30 09/06/2025      500          20.0              20.2              20.0
+## 31 09/06/2025      600          19.4              20.0              19.4
+## 32 09/06/2025      700          18.6              19.3              18.6
+## 33 09/06/2025      800          18.3              18.6              18.3
+## 34 09/06/2025      900          17.8              18.3              17.8
+## 35 09/06/2025     1000          17.7              17.9              17.7
+## 36 09/06/2025     1100          17.5              17.7              17.1
+## 37 09/06/2025     1200          18.3              18.3              17.5
+## 38 09/06/2025     1300          19.2              19.7              18.0
+## 39 09/06/2025     1400          20.9              21.0              19.2
+## 40 09/06/2025     1500          21.8              22.5              20.5
+## 41 09/06/2025     1600          22.8              23.3              21.8
+## 42 09/06/2025     1700          22.8              23.3              22.2
+## 43 09/06/2025     1800          22.5              23.3              22.4
+## 44 09/06/2025     1900          23.1              23.1              22.3
+## 45 09/06/2025     2000          22.2              23.2              22.1
+## 46 09/06/2025     2100          21.0              22.2              21.0
+## 47 09/06/2025     2200          19.4              21.0              19.2
+## 48 09/06/2025     2300          18.3              19.4              18.2
+##    ponto_orvalho_C irradiacao_kJ_m2
+## 1             21.1               NA
+## 2             20.9               NA
+## 3             20.9               NA
+## 4             20.8               NA
+## 5             20.7               NA
+## 6             20.8               NA
+## 7             20.8               NA
+## 8             20.9               NA
+## 9             20.7               NA
+## 10            20.8               NA
+## 11            20.6               NA
+## 12            20.5              3.8
+## 13            20.9            140.9
+## 14            20.2            239.8
+## 15            20.2            267.1
+## 16            19.7            234.9
+## 17            19.4           1013.6
+## 18            19.1            641.2
+## 19            19.5            531.5
+## 20            19.6            244.8
+## 21            19.9            297.8
+## 22            19.9             61.0
+## 23            20.2               NA
+## 24            20.1               NA
+## 25            19.9               NA
+## 26            20.2               NA
+## 27            18.7               NA
+## 28            18.1               NA
+## 29            18.0               NA
+## 30            17.3               NA
+## 31            16.7               NA
+## 32            15.7               NA
+## 33            15.4               NA
+## 34            15.4               NA
+## 35            15.3               NA
+## 36            15.0             93.6
+## 37            15.1            726.1
+## 38            15.4           1295.5
+## 39            16.1           1713.1
+## 40            15.4           1883.6
+## 41            14.3           1746.3
+## 42            14.6           1385.7
+## 43            13.7           1398.8
+## 44            13.7           1055.1
+## 45            13.9            695.3
+## 46            14.1            206.5
+## 47            14.5               NA
+## 48            13.6               NA
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dados\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 1  24/06/2025        0          15.5              16.4              15.5
+## 2  24/06/2025      100          14.4              15.5              14.4
+## 3  24/06/2025      200          13.1              14.4              13.0
+## 4  24/06/2025      300          11.8              13.2              11.7
+## 5  24/06/2025      400          11.1              12.1              11.0
+## 6  24/06/2025      500          10.3              11.2              10.3
+## 7  24/06/2025      600           8.3              10.3               8.2
+## 8  24/06/2025      700           7.3               8.3               7.3
+## 9  24/06/2025      800           7.3               7.6               7.3
+## 10 24/06/2025      900           6.3               7.4               6.3
+## 11 24/06/2025     1000           5.6               6.3               5.5
+## 12 24/06/2025     1100           6.7               6.8               5.6
+## 13 24/06/2025     1200           9.8               9.8               6.7
+## 14 24/06/2025     1300          11.8              11.8               9.8
+## 15 24/06/2025     1400          13.8              14.1              11.4
+## 16 24/06/2025     1500          15.9              16.0              13.4
+## 17 24/06/2025     1600          17.0              17.8              15.5
+## 18 24/06/2025     1700          18.3              19.0              17.0
+## 19 24/06/2025     1800          19.3              19.4              18.2
+## 20 24/06/2025     1900          18.9              19.5              18.7
+## 21 24/06/2025     2000          18.5              19.3              18.5
+## 22 24/06/2025     2100          16.1              18.5              16.0
+## 23 24/06/2025     2200          14.1              16.3              14.1
+## 24 24/06/2025     2300          12.1              14.1              11.9
+## 25 25/06/2025        0          10.5              12.0              10.5
+## 26 25/06/2025      100          10.1              10.6              10.0
+## 27 25/06/2025      200           9.6              10.1               9.4
+## 28 25/06/2025      300           9.4               9.6               9.2
+## 29 25/06/2025      400           9.1               9.4               9.0
+## 30 25/06/2025      500           8.4               9.1               8.4
+## 31 25/06/2025      600           7.9               8.7               7.9
+## 32 25/06/2025      700           7.8               8.2               7.7
+## 33 25/06/2025      800           7.8               8.1               7.5
+## 34 25/06/2025      900           8.5               8.8               7.8
+## 35 25/06/2025     1000           8.9               8.9               8.3
+## 36 25/06/2025     1100          10.9              11.3               8.8
+## 37 25/06/2025     1200          13.7              13.9              10.9
+## 38 25/06/2025     1300          16.6              16.6              13.7
+## 39 25/06/2025     1400          21.0              21.2              16.5
+## 40 25/06/2025     1500          23.3              23.6              20.3
+## 41 25/06/2025     1600          24.7              24.8              23.0
+## 42 25/06/2025     1700          25.3              25.9              24.5
+## 43 25/06/2025     1800          26.1              26.9              25.2
+## 44 25/06/2025     1900          26.6              27.2              26.0
+## 45 25/06/2025     2000          26.0              27.1              26.0
+## 46 25/06/2025     2100          24.6              26.0              24.5
+## 47 25/06/2025     2200          22.7              24.6              22.7
+## 48 25/06/2025     2300          20.2              22.7              20.2
+##    ponto_orvalho_C irradiacao_kJ_m2
+## 1             10.4               NA
+## 2              8.9               NA
+## 3              8.1               NA
+## 4              7.7               NA
+## 5              6.8               NA
+## 6              5.4               NA
+## 7              5.5               NA
+## 8              5.3               NA
+## 9              5.6               NA
+## 10             5.0               NA
+## 11             4.3               NA
+## 12             3.4            126.8
+## 13             2.9            737.8
+## 14             1.8           1430.1
+## 15             1.5           1994.6
+## 16             0.5           2457.4
+## 17            -0.5           2645.1
+## 18            -0.5           2595.8
+## 19            -1.5           2314.0
+## 20            -1.5           1813.6
+## 21            -2.6           1103.5
+## 22             0.8            324.9
+## 23             2.2               NA
+## 24             4.2               NA
+## 25             4.2               NA
+## 26             2.8               NA
+## 27             2.3               NA
+## 28             2.5               NA
+## 29             2.7               NA
+## 30             3.3               NA
+## 31             3.9               NA
+## 32             3.9               NA
+## 33             4.3               NA
+## 34             4.8               NA
+## 35             5.4               NA
+## 36             6.7            117.0
+## 37             6.9            663.6
+## 38             6.9            814.8
+## 39             6.7           1981.1
+## 40             5.9           2281.5
+## 41             7.2           2468.9
+## 42             7.6           2406.5
+## 43            10.6           2131.7
+## 44            12.6           1653.8
+## 45            13.0           1005.8
+## 46            13.9            297.1
+## 47            14.4               NA
+## 48            15.0               NA
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Conversão de data e hora}
+\NormalTok{dados\_data1}\SpecialCharTok{$}\NormalTok{hora\_UTC\_texto }\OtherTok{\textless{}{-}} \FunctionTok{sprintf}\NormalTok{(}
+  \StringTok{"\%04d"}\NormalTok{,}
+\NormalTok{  dados\_data1}\SpecialCharTok{$}\NormalTok{hora\_UTC}
+\NormalTok{)}
+\NormalTok{dados\_data2}\SpecialCharTok{$}\NormalTok{hora\_UTC\_texto }\OtherTok{\textless{}{-}} \FunctionTok{sprintf}\NormalTok{(}
+  \StringTok{"\%04d"}\NormalTok{,}
+\NormalTok{  dados\_data2}\SpecialCharTok{$}\NormalTok{hora\_UTC}
+\NormalTok{)}
+
+\NormalTok{dados\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 1  08/06/2025        0          24.0              24.8              24.0
+## 2  08/06/2025      100          23.5              24.0              23.5
+## 3  08/06/2025      200          23.7              23.7              23.4
+## 4  08/06/2025      300          23.1              23.7              23.0
+## 5  08/06/2025      400          22.9              23.0              22.9
+## 6  08/06/2025      500          22.7              22.9              22.7
+## 7  08/06/2025      600          22.7              22.8              22.6
+## 8  08/06/2025      700          22.4              22.9              22.4
+## 9  08/06/2025      800          22.1              22.4              22.1
+## 10 08/06/2025      900          22.2              22.2              22.0
+## 11 08/06/2025     1000          21.9              22.3              21.9
+## 12 08/06/2025     1100          21.7              21.9              21.7
+## 13 08/06/2025     1200          22.1              22.1              21.7
+## 14 08/06/2025     1300          22.0              22.4              22.0
+## 15 08/06/2025     1400          21.9              22.2              21.5
+## 16 08/06/2025     1500          20.9              21.9              20.4
+## 17 08/06/2025     1600          21.9              22.2              20.9
+## 18 08/06/2025     1700          22.5              22.5              21.7
+## 19 08/06/2025     1800          22.3              22.6              22.3
+## 20 08/06/2025     1900          22.4              22.4              22.2
+## 21 08/06/2025     2000          22.2              22.5              22.2
+## 22 08/06/2025     2100          21.9              22.2              21.8
+## 23 08/06/2025     2200          21.7              21.9              21.6
+## 24 08/06/2025     2300          21.7              21.7              21.6
+## 25 09/06/2025        0          21.2              21.8              21.2
+## 26 09/06/2025      100          21.7              21.7              21.1
+## 27 09/06/2025      200          20.9              21.7              20.9
+## 28 09/06/2025      300          20.2              20.9              20.2
+## 29 09/06/2025      400          20.1              20.2              20.0
+## 30 09/06/2025      500          20.0              20.2              20.0
+## 31 09/06/2025      600          19.4              20.0              19.4
+## 32 09/06/2025      700          18.6              19.3              18.6
+## 33 09/06/2025      800          18.3              18.6              18.3
+## 34 09/06/2025      900          17.8              18.3              17.8
+## 35 09/06/2025     1000          17.7              17.9              17.7
+## 36 09/06/2025     1100          17.5              17.7              17.1
+## 37 09/06/2025     1200          18.3              18.3              17.5
+## 38 09/06/2025     1300          19.2              19.7              18.0
+## 39 09/06/2025     1400          20.9              21.0              19.2
+## 40 09/06/2025     1500          21.8              22.5              20.5
+## 41 09/06/2025     1600          22.8              23.3              21.8
+## 42 09/06/2025     1700          22.8              23.3              22.2
+## 43 09/06/2025     1800          22.5              23.3              22.4
+## 44 09/06/2025     1900          23.1              23.1              22.3
+## 45 09/06/2025     2000          22.2              23.2              22.1
+## 46 09/06/2025     2100          21.0              22.2              21.0
+## 47 09/06/2025     2200          19.4              21.0              19.2
+## 48 09/06/2025     2300          18.3              19.4              18.2
+##    ponto_orvalho_C irradiacao_kJ_m2 hora_UTC_texto
+## 1             21.1               NA           0000
+## 2             20.9               NA           0100
+## 3             20.9               NA           0200
+## 4             20.8               NA           0300
+## 5             20.7               NA           0400
+## 6             20.8               NA           0500
+## 7             20.8               NA           0600
+## 8             20.9               NA           0700
+## 9             20.7               NA           0800
+## 10            20.8               NA           0900
+## 11            20.6               NA           1000
+## 12            20.5              3.8           1100
+## 13            20.9            140.9           1200
+## 14            20.2            239.8           1300
+## 15            20.2            267.1           1400
+## 16            19.7            234.9           1500
+## 17            19.4           1013.6           1600
+## 18            19.1            641.2           1700
+## 19            19.5            531.5           1800
+## 20            19.6            244.8           1900
+## 21            19.9            297.8           2000
+## 22            19.9             61.0           2100
+## 23            20.2               NA           2200
+## 24            20.1               NA           2300
+## 25            19.9               NA           0000
+## 26            20.2               NA           0100
+## 27            18.7               NA           0200
+## 28            18.1               NA           0300
+## 29            18.0               NA           0400
+## 30            17.3               NA           0500
+## 31            16.7               NA           0600
+## 32            15.7               NA           0700
+## 33            15.4               NA           0800
+## 34            15.4               NA           0900
+## 35            15.3               NA           1000
+## 36            15.0             93.6           1100
+## 37            15.1            726.1           1200
+## 38            15.4           1295.5           1300
+## 39            16.1           1713.1           1400
+## 40            15.4           1883.6           1500
+## 41            14.3           1746.3           1600
+## 42            14.6           1385.7           1700
+## 43            13.7           1398.8           1800
+## 44            13.7           1055.1           1900
+## 45            13.9            695.3           2000
+## 46            14.1            206.5           2100
+## 47            14.5               NA           2200
+## 48            13.6               NA           2300
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dados\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 1  24/06/2025        0          15.5              16.4              15.5
+## 2  24/06/2025      100          14.4              15.5              14.4
+## 3  24/06/2025      200          13.1              14.4              13.0
+## 4  24/06/2025      300          11.8              13.2              11.7
+## 5  24/06/2025      400          11.1              12.1              11.0
+## 6  24/06/2025      500          10.3              11.2              10.3
+## 7  24/06/2025      600           8.3              10.3               8.2
+## 8  24/06/2025      700           7.3               8.3               7.3
+## 9  24/06/2025      800           7.3               7.6               7.3
+## 10 24/06/2025      900           6.3               7.4               6.3
+## 11 24/06/2025     1000           5.6               6.3               5.5
+## 12 24/06/2025     1100           6.7               6.8               5.6
+## 13 24/06/2025     1200           9.8               9.8               6.7
+## 14 24/06/2025     1300          11.8              11.8               9.8
+## 15 24/06/2025     1400          13.8              14.1              11.4
+## 16 24/06/2025     1500          15.9              16.0              13.4
+## 17 24/06/2025     1600          17.0              17.8              15.5
+## 18 24/06/2025     1700          18.3              19.0              17.0
+## 19 24/06/2025     1800          19.3              19.4              18.2
+## 20 24/06/2025     1900          18.9              19.5              18.7
+## 21 24/06/2025     2000          18.5              19.3              18.5
+## 22 24/06/2025     2100          16.1              18.5              16.0
+## 23 24/06/2025     2200          14.1              16.3              14.1
+## 24 24/06/2025     2300          12.1              14.1              11.9
+## 25 25/06/2025        0          10.5              12.0              10.5
+## 26 25/06/2025      100          10.1              10.6              10.0
+## 27 25/06/2025      200           9.6              10.1               9.4
+## 28 25/06/2025      300           9.4               9.6               9.2
+## 29 25/06/2025      400           9.1               9.4               9.0
+## 30 25/06/2025      500           8.4               9.1               8.4
+## 31 25/06/2025      600           7.9               8.7               7.9
+## 32 25/06/2025      700           7.8               8.2               7.7
+## 33 25/06/2025      800           7.8               8.1               7.5
+## 34 25/06/2025      900           8.5               8.8               7.8
+## 35 25/06/2025     1000           8.9               8.9               8.3
+## 36 25/06/2025     1100          10.9              11.3               8.8
+## 37 25/06/2025     1200          13.7              13.9              10.9
+## 38 25/06/2025     1300          16.6              16.6              13.7
+## 39 25/06/2025     1400          21.0              21.2              16.5
+## 40 25/06/2025     1500          23.3              23.6              20.3
+## 41 25/06/2025     1600          24.7              24.8              23.0
+## 42 25/06/2025     1700          25.3              25.9              24.5
+## 43 25/06/2025     1800          26.1              26.9              25.2
+## 44 25/06/2025     1900          26.6              27.2              26.0
+## 45 25/06/2025     2000          26.0              27.1              26.0
+## 46 25/06/2025     2100          24.6              26.0              24.5
+## 47 25/06/2025     2200          22.7              24.6              22.7
+## 48 25/06/2025     2300          20.2              22.7              20.2
+##    ponto_orvalho_C irradiacao_kJ_m2 hora_UTC_texto
+## 1             10.4               NA           0000
+## 2              8.9               NA           0100
+## 3              8.1               NA           0200
+## 4              7.7               NA           0300
+## 5              6.8               NA           0400
+## 6              5.4               NA           0500
+## 7              5.5               NA           0600
+## 8              5.3               NA           0700
+## 9              5.6               NA           0800
+## 10             5.0               NA           0900
+## 11             4.3               NA           1000
+## 12             3.4            126.8           1100
+## 13             2.9            737.8           1200
+## 14             1.8           1430.1           1300
+## 15             1.5           1994.6           1400
+## 16             0.5           2457.4           1500
+## 17            -0.5           2645.1           1600
+## 18            -0.5           2595.8           1700
+## 19            -1.5           2314.0           1800
+## 20            -1.5           1813.6           1900
+## 21            -2.6           1103.5           2000
+## 22             0.8            324.9           2100
+## 23             2.2               NA           2200
+## 24             4.2               NA           2300
+## 25             4.2               NA           0000
+## 26             2.8               NA           0100
+## 27             2.3               NA           0200
+## 28             2.5               NA           0300
+## 29             2.7               NA           0400
+## 30             3.3               NA           0500
+## 31             3.9               NA           0600
+## 32             3.9               NA           0700
+## 33             4.3               NA           0800
+## 34             4.8               NA           0900
+## 35             5.4               NA           1000
+## 36             6.7            117.0           1100
+## 37             6.9            663.6           1200
+## 38             6.9            814.8           1300
+## 39             6.7           1981.1           1400
+## 40             5.9           2281.5           1500
+## 41             7.2           2468.9           1600
+## 42             7.6           2406.5           1700
+## 43            10.6           2131.7           1800
+## 44            12.6           1653.8           1900
+## 45            13.0           1005.8           2000
+## 46            13.9            297.1           2100
+## 47            14.4               NA           2200
+## 48            15.0               NA           2300
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Criação das colunas data e hora UTC}
+\NormalTok{dados\_data1}\SpecialCharTok{$}\NormalTok{data\_hora\_UTC }\OtherTok{\textless{}{-}} \FunctionTok{as.POSIXct}\NormalTok{(}
+  \FunctionTok{paste}\NormalTok{(}
+\NormalTok{    dados\_data1}\SpecialCharTok{$}\NormalTok{data,}
+\NormalTok{    dados\_data1}\SpecialCharTok{$}\NormalTok{hora\_UTC\_texto}
+\NormalTok{  ),}
+  \AttributeTok{format =} \StringTok{"\%d/\%m/\%Y \%H\%M"}\NormalTok{,}
+  \AttributeTok{tz =} \StringTok{"UTC"}
+\NormalTok{)}
+\NormalTok{dados\_data2}\SpecialCharTok{$}\NormalTok{data\_hora\_UTC }\OtherTok{\textless{}{-}} \FunctionTok{as.POSIXct}\NormalTok{(}
+  \FunctionTok{paste}\NormalTok{(}
+\NormalTok{    dados\_data2}\SpecialCharTok{$}\NormalTok{data,}
+\NormalTok{    dados\_data2}\SpecialCharTok{$}\NormalTok{hora\_UTC\_texto}
+\NormalTok{  ),}
+  \AttributeTok{format =} \StringTok{"\%d/\%m/\%Y \%H\%M"}\NormalTok{,}
+  \AttributeTok{tz =} \StringTok{"UTC"}
+\NormalTok{)}
+
+\NormalTok{dados\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 1  08/06/2025        0          24.0              24.8              24.0
+## 2  08/06/2025      100          23.5              24.0              23.5
+## 3  08/06/2025      200          23.7              23.7              23.4
+## 4  08/06/2025      300          23.1              23.7              23.0
+## 5  08/06/2025      400          22.9              23.0              22.9
+## 6  08/06/2025      500          22.7              22.9              22.7
+## 7  08/06/2025      600          22.7              22.8              22.6
+## 8  08/06/2025      700          22.4              22.9              22.4
+## 9  08/06/2025      800          22.1              22.4              22.1
+## 10 08/06/2025      900          22.2              22.2              22.0
+## 11 08/06/2025     1000          21.9              22.3              21.9
+## 12 08/06/2025     1100          21.7              21.9              21.7
+## 13 08/06/2025     1200          22.1              22.1              21.7
+## 14 08/06/2025     1300          22.0              22.4              22.0
+## 15 08/06/2025     1400          21.9              22.2              21.5
+## 16 08/06/2025     1500          20.9              21.9              20.4
+## 17 08/06/2025     1600          21.9              22.2              20.9
+## 18 08/06/2025     1700          22.5              22.5              21.7
+## 19 08/06/2025     1800          22.3              22.6              22.3
+## 20 08/06/2025     1900          22.4              22.4              22.2
+## 21 08/06/2025     2000          22.2              22.5              22.2
+## 22 08/06/2025     2100          21.9              22.2              21.8
+## 23 08/06/2025     2200          21.7              21.9              21.6
+## 24 08/06/2025     2300          21.7              21.7              21.6
+## 25 09/06/2025        0          21.2              21.8              21.2
+## 26 09/06/2025      100          21.7              21.7              21.1
+## 27 09/06/2025      200          20.9              21.7              20.9
+## 28 09/06/2025      300          20.2              20.9              20.2
+## 29 09/06/2025      400          20.1              20.2              20.0
+## 30 09/06/2025      500          20.0              20.2              20.0
+## 31 09/06/2025      600          19.4              20.0              19.4
+## 32 09/06/2025      700          18.6              19.3              18.6
+## 33 09/06/2025      800          18.3              18.6              18.3
+## 34 09/06/2025      900          17.8              18.3              17.8
+## 35 09/06/2025     1000          17.7              17.9              17.7
+## 36 09/06/2025     1100          17.5              17.7              17.1
+## 37 09/06/2025     1200          18.3              18.3              17.5
+## 38 09/06/2025     1300          19.2              19.7              18.0
+## 39 09/06/2025     1400          20.9              21.0              19.2
+## 40 09/06/2025     1500          21.8              22.5              20.5
+## 41 09/06/2025     1600          22.8              23.3              21.8
+## 42 09/06/2025     1700          22.8              23.3              22.2
+## 43 09/06/2025     1800          22.5              23.3              22.4
+## 44 09/06/2025     1900          23.1              23.1              22.3
+## 45 09/06/2025     2000          22.2              23.2              22.1
+## 46 09/06/2025     2100          21.0              22.2              21.0
+## 47 09/06/2025     2200          19.4              21.0              19.2
+## 48 09/06/2025     2300          18.3              19.4              18.2
+##    ponto_orvalho_C irradiacao_kJ_m2 hora_UTC_texto       data_hora_UTC
+## 1             21.1               NA           0000 2025-06-08 00:00:00
+## 2             20.9               NA           0100 2025-06-08 01:00:00
+## 3             20.9               NA           0200 2025-06-08 02:00:00
+## 4             20.8               NA           0300 2025-06-08 03:00:00
+## 5             20.7               NA           0400 2025-06-08 04:00:00
+## 6             20.8               NA           0500 2025-06-08 05:00:00
+## 7             20.8               NA           0600 2025-06-08 06:00:00
+## 8             20.9               NA           0700 2025-06-08 07:00:00
+## 9             20.7               NA           0800 2025-06-08 08:00:00
+## 10            20.8               NA           0900 2025-06-08 09:00:00
+## 11            20.6               NA           1000 2025-06-08 10:00:00
+## 12            20.5              3.8           1100 2025-06-08 11:00:00
+## 13            20.9            140.9           1200 2025-06-08 12:00:00
+## 14            20.2            239.8           1300 2025-06-08 13:00:00
+## 15            20.2            267.1           1400 2025-06-08 14:00:00
+## 16            19.7            234.9           1500 2025-06-08 15:00:00
+## 17            19.4           1013.6           1600 2025-06-08 16:00:00
+## 18            19.1            641.2           1700 2025-06-08 17:00:00
+## 19            19.5            531.5           1800 2025-06-08 18:00:00
+## 20            19.6            244.8           1900 2025-06-08 19:00:00
+## 21            19.9            297.8           2000 2025-06-08 20:00:00
+## 22            19.9             61.0           2100 2025-06-08 21:00:00
+## 23            20.2               NA           2200 2025-06-08 22:00:00
+## 24            20.1               NA           2300 2025-06-08 23:00:00
+## 25            19.9               NA           0000 2025-06-09 00:00:00
+## 26            20.2               NA           0100 2025-06-09 01:00:00
+## 27            18.7               NA           0200 2025-06-09 02:00:00
+## 28            18.1               NA           0300 2025-06-09 03:00:00
+## 29            18.0               NA           0400 2025-06-09 04:00:00
+## 30            17.3               NA           0500 2025-06-09 05:00:00
+## 31            16.7               NA           0600 2025-06-09 06:00:00
+## 32            15.7               NA           0700 2025-06-09 07:00:00
+## 33            15.4               NA           0800 2025-06-09 08:00:00
+## 34            15.4               NA           0900 2025-06-09 09:00:00
+## 35            15.3               NA           1000 2025-06-09 10:00:00
+## 36            15.0             93.6           1100 2025-06-09 11:00:00
+## 37            15.1            726.1           1200 2025-06-09 12:00:00
+## 38            15.4           1295.5           1300 2025-06-09 13:00:00
+## 39            16.1           1713.1           1400 2025-06-09 14:00:00
+## 40            15.4           1883.6           1500 2025-06-09 15:00:00
+## 41            14.3           1746.3           1600 2025-06-09 16:00:00
+## 42            14.6           1385.7           1700 2025-06-09 17:00:00
+## 43            13.7           1398.8           1800 2025-06-09 18:00:00
+## 44            13.7           1055.1           1900 2025-06-09 19:00:00
+## 45            13.9            695.3           2000 2025-06-09 20:00:00
+## 46            14.1            206.5           2100 2025-06-09 21:00:00
+## 47            14.5               NA           2200 2025-06-09 22:00:00
+## 48            13.6               NA           2300 2025-06-09 23:00:00
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dados\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 1  24/06/2025        0          15.5              16.4              15.5
+## 2  24/06/2025      100          14.4              15.5              14.4
+## 3  24/06/2025      200          13.1              14.4              13.0
+## 4  24/06/2025      300          11.8              13.2              11.7
+## 5  24/06/2025      400          11.1              12.1              11.0
+## 6  24/06/2025      500          10.3              11.2              10.3
+## 7  24/06/2025      600           8.3              10.3               8.2
+## 8  24/06/2025      700           7.3               8.3               7.3
+## 9  24/06/2025      800           7.3               7.6               7.3
+## 10 24/06/2025      900           6.3               7.4               6.3
+## 11 24/06/2025     1000           5.6               6.3               5.5
+## 12 24/06/2025     1100           6.7               6.8               5.6
+## 13 24/06/2025     1200           9.8               9.8               6.7
+## 14 24/06/2025     1300          11.8              11.8               9.8
+## 15 24/06/2025     1400          13.8              14.1              11.4
+## 16 24/06/2025     1500          15.9              16.0              13.4
+## 17 24/06/2025     1600          17.0              17.8              15.5
+## 18 24/06/2025     1700          18.3              19.0              17.0
+## 19 24/06/2025     1800          19.3              19.4              18.2
+## 20 24/06/2025     1900          18.9              19.5              18.7
+## 21 24/06/2025     2000          18.5              19.3              18.5
+## 22 24/06/2025     2100          16.1              18.5              16.0
+## 23 24/06/2025     2200          14.1              16.3              14.1
+## 24 24/06/2025     2300          12.1              14.1              11.9
+## 25 25/06/2025        0          10.5              12.0              10.5
+## 26 25/06/2025      100          10.1              10.6              10.0
+## 27 25/06/2025      200           9.6              10.1               9.4
+## 28 25/06/2025      300           9.4               9.6               9.2
+## 29 25/06/2025      400           9.1               9.4               9.0
+## 30 25/06/2025      500           8.4               9.1               8.4
+## 31 25/06/2025      600           7.9               8.7               7.9
+## 32 25/06/2025      700           7.8               8.2               7.7
+## 33 25/06/2025      800           7.8               8.1               7.5
+## 34 25/06/2025      900           8.5               8.8               7.8
+## 35 25/06/2025     1000           8.9               8.9               8.3
+## 36 25/06/2025     1100          10.9              11.3               8.8
+## 37 25/06/2025     1200          13.7              13.9              10.9
+## 38 25/06/2025     1300          16.6              16.6              13.7
+## 39 25/06/2025     1400          21.0              21.2              16.5
+## 40 25/06/2025     1500          23.3              23.6              20.3
+## 41 25/06/2025     1600          24.7              24.8              23.0
+## 42 25/06/2025     1700          25.3              25.9              24.5
+## 43 25/06/2025     1800          26.1              26.9              25.2
+## 44 25/06/2025     1900          26.6              27.2              26.0
+## 45 25/06/2025     2000          26.0              27.1              26.0
+## 46 25/06/2025     2100          24.6              26.0              24.5
+## 47 25/06/2025     2200          22.7              24.6              22.7
+## 48 25/06/2025     2300          20.2              22.7              20.2
+##    ponto_orvalho_C irradiacao_kJ_m2 hora_UTC_texto       data_hora_UTC
+## 1             10.4               NA           0000 2025-06-24 00:00:00
+## 2              8.9               NA           0100 2025-06-24 01:00:00
+## 3              8.1               NA           0200 2025-06-24 02:00:00
+## 4              7.7               NA           0300 2025-06-24 03:00:00
+## 5              6.8               NA           0400 2025-06-24 04:00:00
+## 6              5.4               NA           0500 2025-06-24 05:00:00
+## 7              5.5               NA           0600 2025-06-24 06:00:00
+## 8              5.3               NA           0700 2025-06-24 07:00:00
+## 9              5.6               NA           0800 2025-06-24 08:00:00
+## 10             5.0               NA           0900 2025-06-24 09:00:00
+## 11             4.3               NA           1000 2025-06-24 10:00:00
+## 12             3.4            126.8           1100 2025-06-24 11:00:00
+## 13             2.9            737.8           1200 2025-06-24 12:00:00
+## 14             1.8           1430.1           1300 2025-06-24 13:00:00
+## 15             1.5           1994.6           1400 2025-06-24 14:00:00
+## 16             0.5           2457.4           1500 2025-06-24 15:00:00
+## 17            -0.5           2645.1           1600 2025-06-24 16:00:00
+## 18            -0.5           2595.8           1700 2025-06-24 17:00:00
+## 19            -1.5           2314.0           1800 2025-06-24 18:00:00
+## 20            -1.5           1813.6           1900 2025-06-24 19:00:00
+## 21            -2.6           1103.5           2000 2025-06-24 20:00:00
+## 22             0.8            324.9           2100 2025-06-24 21:00:00
+## 23             2.2               NA           2200 2025-06-24 22:00:00
+## 24             4.2               NA           2300 2025-06-24 23:00:00
+## 25             4.2               NA           0000 2025-06-25 00:00:00
+## 26             2.8               NA           0100 2025-06-25 01:00:00
+## 27             2.3               NA           0200 2025-06-25 02:00:00
+## 28             2.5               NA           0300 2025-06-25 03:00:00
+## 29             2.7               NA           0400 2025-06-25 04:00:00
+## 30             3.3               NA           0500 2025-06-25 05:00:00
+## 31             3.9               NA           0600 2025-06-25 06:00:00
+## 32             3.9               NA           0700 2025-06-25 07:00:00
+## 33             4.3               NA           0800 2025-06-25 08:00:00
+## 34             4.8               NA           0900 2025-06-25 09:00:00
+## 35             5.4               NA           1000 2025-06-25 10:00:00
+## 36             6.7            117.0           1100 2025-06-25 11:00:00
+## 37             6.9            663.6           1200 2025-06-25 12:00:00
+## 38             6.9            814.8           1300 2025-06-25 13:00:00
+## 39             6.7           1981.1           1400 2025-06-25 14:00:00
+## 40             5.9           2281.5           1500 2025-06-25 15:00:00
+## 41             7.2           2468.9           1600 2025-06-25 16:00:00
+## 42             7.6           2406.5           1700 2025-06-25 17:00:00
+## 43            10.6           2131.7           1800 2025-06-25 18:00:00
+## 44            12.6           1653.8           1900 2025-06-25 19:00:00
+## 45            13.0           1005.8           2000 2025-06-25 20:00:00
+## 46            13.9            297.1           2100 2025-06-25 21:00:00
+## 47            14.4               NA           2200 2025-06-25 22:00:00
+## 48            15.0               NA           2300 2025-06-25 23:00:00
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Conversão do horário UTC para o horário local}
+
+\NormalTok{dados\_data1}\SpecialCharTok{$}\NormalTok{data\_hora\_local }\OtherTok{\textless{}{-}} \FunctionTok{as.POSIXct}\NormalTok{(}
+  \FunctionTok{format}\NormalTok{(}
+\NormalTok{    dados\_data1}\SpecialCharTok{$}\NormalTok{data\_hora\_UTC,}
+    \AttributeTok{tz =} \StringTok{"America/Campo\_Grande"}
+\NormalTok{  ),}
+  \AttributeTok{tz =} \StringTok{"America/Campo\_Grande"}
+\NormalTok{)}
+\NormalTok{dados\_data2}\SpecialCharTok{$}\NormalTok{data\_hora\_local }\OtherTok{\textless{}{-}} \FunctionTok{as.POSIXct}\NormalTok{(}
+  \FunctionTok{format}\NormalTok{(}
+\NormalTok{    dados\_data2}\SpecialCharTok{$}\NormalTok{data\_hora\_UTC,}
+    \AttributeTok{tz =} \StringTok{"America/Campo\_Grande"}
+\NormalTok{  ),}
+  \AttributeTok{tz =} \StringTok{"America/Campo\_Grande"}
+\NormalTok{)}
+
+\NormalTok{dados\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 1  08/06/2025        0          24.0              24.8              24.0
+## 2  08/06/2025      100          23.5              24.0              23.5
+## 3  08/06/2025      200          23.7              23.7              23.4
+## 4  08/06/2025      300          23.1              23.7              23.0
+## 5  08/06/2025      400          22.9              23.0              22.9
+## 6  08/06/2025      500          22.7              22.9              22.7
+## 7  08/06/2025      600          22.7              22.8              22.6
+## 8  08/06/2025      700          22.4              22.9              22.4
+## 9  08/06/2025      800          22.1              22.4              22.1
+## 10 08/06/2025      900          22.2              22.2              22.0
+## 11 08/06/2025     1000          21.9              22.3              21.9
+## 12 08/06/2025     1100          21.7              21.9              21.7
+## 13 08/06/2025     1200          22.1              22.1              21.7
+## 14 08/06/2025     1300          22.0              22.4              22.0
+## 15 08/06/2025     1400          21.9              22.2              21.5
+## 16 08/06/2025     1500          20.9              21.9              20.4
+## 17 08/06/2025     1600          21.9              22.2              20.9
+## 18 08/06/2025     1700          22.5              22.5              21.7
+## 19 08/06/2025     1800          22.3              22.6              22.3
+## 20 08/06/2025     1900          22.4              22.4              22.2
+## 21 08/06/2025     2000          22.2              22.5              22.2
+## 22 08/06/2025     2100          21.9              22.2              21.8
+## 23 08/06/2025     2200          21.7              21.9              21.6
+## 24 08/06/2025     2300          21.7              21.7              21.6
+## 25 09/06/2025        0          21.2              21.8              21.2
+## 26 09/06/2025      100          21.7              21.7              21.1
+## 27 09/06/2025      200          20.9              21.7              20.9
+## 28 09/06/2025      300          20.2              20.9              20.2
+## 29 09/06/2025      400          20.1              20.2              20.0
+## 30 09/06/2025      500          20.0              20.2              20.0
+## 31 09/06/2025      600          19.4              20.0              19.4
+## 32 09/06/2025      700          18.6              19.3              18.6
+## 33 09/06/2025      800          18.3              18.6              18.3
+## 34 09/06/2025      900          17.8              18.3              17.8
+## 35 09/06/2025     1000          17.7              17.9              17.7
+## 36 09/06/2025     1100          17.5              17.7              17.1
+## 37 09/06/2025     1200          18.3              18.3              17.5
+## 38 09/06/2025     1300          19.2              19.7              18.0
+## 39 09/06/2025     1400          20.9              21.0              19.2
+## 40 09/06/2025     1500          21.8              22.5              20.5
+## 41 09/06/2025     1600          22.8              23.3              21.8
+## 42 09/06/2025     1700          22.8              23.3              22.2
+## 43 09/06/2025     1800          22.5              23.3              22.4
+## 44 09/06/2025     1900          23.1              23.1              22.3
+## 45 09/06/2025     2000          22.2              23.2              22.1
+## 46 09/06/2025     2100          21.0              22.2              21.0
+## 47 09/06/2025     2200          19.4              21.0              19.2
+## 48 09/06/2025     2300          18.3              19.4              18.2
+##    ponto_orvalho_C irradiacao_kJ_m2 hora_UTC_texto       data_hora_UTC
+## 1             21.1               NA           0000 2025-06-08 00:00:00
+## 2             20.9               NA           0100 2025-06-08 01:00:00
+## 3             20.9               NA           0200 2025-06-08 02:00:00
+## 4             20.8               NA           0300 2025-06-08 03:00:00
+## 5             20.7               NA           0400 2025-06-08 04:00:00
+## 6             20.8               NA           0500 2025-06-08 05:00:00
+## 7             20.8               NA           0600 2025-06-08 06:00:00
+## 8             20.9               NA           0700 2025-06-08 07:00:00
+## 9             20.7               NA           0800 2025-06-08 08:00:00
+## 10            20.8               NA           0900 2025-06-08 09:00:00
+## 11            20.6               NA           1000 2025-06-08 10:00:00
+## 12            20.5              3.8           1100 2025-06-08 11:00:00
+## 13            20.9            140.9           1200 2025-06-08 12:00:00
+## 14            20.2            239.8           1300 2025-06-08 13:00:00
+## 15            20.2            267.1           1400 2025-06-08 14:00:00
+## 16            19.7            234.9           1500 2025-06-08 15:00:00
+## 17            19.4           1013.6           1600 2025-06-08 16:00:00
+## 18            19.1            641.2           1700 2025-06-08 17:00:00
+## 19            19.5            531.5           1800 2025-06-08 18:00:00
+## 20            19.6            244.8           1900 2025-06-08 19:00:00
+## 21            19.9            297.8           2000 2025-06-08 20:00:00
+## 22            19.9             61.0           2100 2025-06-08 21:00:00
+## 23            20.2               NA           2200 2025-06-08 22:00:00
+## 24            20.1               NA           2300 2025-06-08 23:00:00
+## 25            19.9               NA           0000 2025-06-09 00:00:00
+## 26            20.2               NA           0100 2025-06-09 01:00:00
+## 27            18.7               NA           0200 2025-06-09 02:00:00
+## 28            18.1               NA           0300 2025-06-09 03:00:00
+## 29            18.0               NA           0400 2025-06-09 04:00:00
+## 30            17.3               NA           0500 2025-06-09 05:00:00
+## 31            16.7               NA           0600 2025-06-09 06:00:00
+## 32            15.7               NA           0700 2025-06-09 07:00:00
+## 33            15.4               NA           0800 2025-06-09 08:00:00
+## 34            15.4               NA           0900 2025-06-09 09:00:00
+## 35            15.3               NA           1000 2025-06-09 10:00:00
+## 36            15.0             93.6           1100 2025-06-09 11:00:00
+## 37            15.1            726.1           1200 2025-06-09 12:00:00
+## 38            15.4           1295.5           1300 2025-06-09 13:00:00
+## 39            16.1           1713.1           1400 2025-06-09 14:00:00
+## 40            15.4           1883.6           1500 2025-06-09 15:00:00
+## 41            14.3           1746.3           1600 2025-06-09 16:00:00
+## 42            14.6           1385.7           1700 2025-06-09 17:00:00
+## 43            13.7           1398.8           1800 2025-06-09 18:00:00
+## 44            13.7           1055.1           1900 2025-06-09 19:00:00
+## 45            13.9            695.3           2000 2025-06-09 20:00:00
+## 46            14.1            206.5           2100 2025-06-09 21:00:00
+## 47            14.5               NA           2200 2025-06-09 22:00:00
+## 48            13.6               NA           2300 2025-06-09 23:00:00
+##        data_hora_local
+## 1  2025-06-07 20:00:00
+## 2  2025-06-07 21:00:00
+## 3  2025-06-07 22:00:00
+## 4  2025-06-07 23:00:00
+## 5  2025-06-08 00:00:00
+## 6  2025-06-08 01:00:00
+## 7  2025-06-08 02:00:00
+## 8  2025-06-08 03:00:00
+## 9  2025-06-08 04:00:00
+## 10 2025-06-08 05:00:00
+## 11 2025-06-08 06:00:00
+## 12 2025-06-08 07:00:00
+## 13 2025-06-08 08:00:00
+## 14 2025-06-08 09:00:00
+## 15 2025-06-08 10:00:00
+## 16 2025-06-08 11:00:00
+## 17 2025-06-08 12:00:00
+## 18 2025-06-08 13:00:00
+## 19 2025-06-08 14:00:00
+## 20 2025-06-08 15:00:00
+## 21 2025-06-08 16:00:00
+## 22 2025-06-08 17:00:00
+## 23 2025-06-08 18:00:00
+## 24 2025-06-08 19:00:00
+## 25 2025-06-08 20:00:00
+## 26 2025-06-08 21:00:00
+## 27 2025-06-08 22:00:00
+## 28 2025-06-08 23:00:00
+## 29 2025-06-09 00:00:00
+## 30 2025-06-09 01:00:00
+## 31 2025-06-09 02:00:00
+## 32 2025-06-09 03:00:00
+## 33 2025-06-09 04:00:00
+## 34 2025-06-09 05:00:00
+## 35 2025-06-09 06:00:00
+## 36 2025-06-09 07:00:00
+## 37 2025-06-09 08:00:00
+## 38 2025-06-09 09:00:00
+## 39 2025-06-09 10:00:00
+## 40 2025-06-09 11:00:00
+## 41 2025-06-09 12:00:00
+## 42 2025-06-09 13:00:00
+## 43 2025-06-09 14:00:00
+## 44 2025-06-09 15:00:00
+## 45 2025-06-09 16:00:00
+## 46 2025-06-09 17:00:00
+## 47 2025-06-09 18:00:00
+## 48 2025-06-09 19:00:00
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dados\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 1  24/06/2025        0          15.5              16.4              15.5
+## 2  24/06/2025      100          14.4              15.5              14.4
+## 3  24/06/2025      200          13.1              14.4              13.0
+## 4  24/06/2025      300          11.8              13.2              11.7
+## 5  24/06/2025      400          11.1              12.1              11.0
+## 6  24/06/2025      500          10.3              11.2              10.3
+## 7  24/06/2025      600           8.3              10.3               8.2
+## 8  24/06/2025      700           7.3               8.3               7.3
+## 9  24/06/2025      800           7.3               7.6               7.3
+## 10 24/06/2025      900           6.3               7.4               6.3
+## 11 24/06/2025     1000           5.6               6.3               5.5
+## 12 24/06/2025     1100           6.7               6.8               5.6
+## 13 24/06/2025     1200           9.8               9.8               6.7
+## 14 24/06/2025     1300          11.8              11.8               9.8
+## 15 24/06/2025     1400          13.8              14.1              11.4
+## 16 24/06/2025     1500          15.9              16.0              13.4
+## 17 24/06/2025     1600          17.0              17.8              15.5
+## 18 24/06/2025     1700          18.3              19.0              17.0
+## 19 24/06/2025     1800          19.3              19.4              18.2
+## 20 24/06/2025     1900          18.9              19.5              18.7
+## 21 24/06/2025     2000          18.5              19.3              18.5
+## 22 24/06/2025     2100          16.1              18.5              16.0
+## 23 24/06/2025     2200          14.1              16.3              14.1
+## 24 24/06/2025     2300          12.1              14.1              11.9
+## 25 25/06/2025        0          10.5              12.0              10.5
+## 26 25/06/2025      100          10.1              10.6              10.0
+## 27 25/06/2025      200           9.6              10.1               9.4
+## 28 25/06/2025      300           9.4               9.6               9.2
+## 29 25/06/2025      400           9.1               9.4               9.0
+## 30 25/06/2025      500           8.4               9.1               8.4
+## 31 25/06/2025      600           7.9               8.7               7.9
+## 32 25/06/2025      700           7.8               8.2               7.7
+## 33 25/06/2025      800           7.8               8.1               7.5
+## 34 25/06/2025      900           8.5               8.8               7.8
+## 35 25/06/2025     1000           8.9               8.9               8.3
+## 36 25/06/2025     1100          10.9              11.3               8.8
+## 37 25/06/2025     1200          13.7              13.9              10.9
+## 38 25/06/2025     1300          16.6              16.6              13.7
+## 39 25/06/2025     1400          21.0              21.2              16.5
+## 40 25/06/2025     1500          23.3              23.6              20.3
+## 41 25/06/2025     1600          24.7              24.8              23.0
+## 42 25/06/2025     1700          25.3              25.9              24.5
+## 43 25/06/2025     1800          26.1              26.9              25.2
+## 44 25/06/2025     1900          26.6              27.2              26.0
+## 45 25/06/2025     2000          26.0              27.1              26.0
+## 46 25/06/2025     2100          24.6              26.0              24.5
+## 47 25/06/2025     2200          22.7              24.6              22.7
+## 48 25/06/2025     2300          20.2              22.7              20.2
+##    ponto_orvalho_C irradiacao_kJ_m2 hora_UTC_texto       data_hora_UTC
+## 1             10.4               NA           0000 2025-06-24 00:00:00
+## 2              8.9               NA           0100 2025-06-24 01:00:00
+## 3              8.1               NA           0200 2025-06-24 02:00:00
+## 4              7.7               NA           0300 2025-06-24 03:00:00
+## 5              6.8               NA           0400 2025-06-24 04:00:00
+## 6              5.4               NA           0500 2025-06-24 05:00:00
+## 7              5.5               NA           0600 2025-06-24 06:00:00
+## 8              5.3               NA           0700 2025-06-24 07:00:00
+## 9              5.6               NA           0800 2025-06-24 08:00:00
+## 10             5.0               NA           0900 2025-06-24 09:00:00
+## 11             4.3               NA           1000 2025-06-24 10:00:00
+## 12             3.4            126.8           1100 2025-06-24 11:00:00
+## 13             2.9            737.8           1200 2025-06-24 12:00:00
+## 14             1.8           1430.1           1300 2025-06-24 13:00:00
+## 15             1.5           1994.6           1400 2025-06-24 14:00:00
+## 16             0.5           2457.4           1500 2025-06-24 15:00:00
+## 17            -0.5           2645.1           1600 2025-06-24 16:00:00
+## 18            -0.5           2595.8           1700 2025-06-24 17:00:00
+## 19            -1.5           2314.0           1800 2025-06-24 18:00:00
+## 20            -1.5           1813.6           1900 2025-06-24 19:00:00
+## 21            -2.6           1103.5           2000 2025-06-24 20:00:00
+## 22             0.8            324.9           2100 2025-06-24 21:00:00
+## 23             2.2               NA           2200 2025-06-24 22:00:00
+## 24             4.2               NA           2300 2025-06-24 23:00:00
+## 25             4.2               NA           0000 2025-06-25 00:00:00
+## 26             2.8               NA           0100 2025-06-25 01:00:00
+## 27             2.3               NA           0200 2025-06-25 02:00:00
+## 28             2.5               NA           0300 2025-06-25 03:00:00
+## 29             2.7               NA           0400 2025-06-25 04:00:00
+## 30             3.3               NA           0500 2025-06-25 05:00:00
+## 31             3.9               NA           0600 2025-06-25 06:00:00
+## 32             3.9               NA           0700 2025-06-25 07:00:00
+## 33             4.3               NA           0800 2025-06-25 08:00:00
+## 34             4.8               NA           0900 2025-06-25 09:00:00
+## 35             5.4               NA           1000 2025-06-25 10:00:00
+## 36             6.7            117.0           1100 2025-06-25 11:00:00
+## 37             6.9            663.6           1200 2025-06-25 12:00:00
+## 38             6.9            814.8           1300 2025-06-25 13:00:00
+## 39             6.7           1981.1           1400 2025-06-25 14:00:00
+## 40             5.9           2281.5           1500 2025-06-25 15:00:00
+## 41             7.2           2468.9           1600 2025-06-25 16:00:00
+## 42             7.6           2406.5           1700 2025-06-25 17:00:00
+## 43            10.6           2131.7           1800 2025-06-25 18:00:00
+## 44            12.6           1653.8           1900 2025-06-25 19:00:00
+## 45            13.0           1005.8           2000 2025-06-25 20:00:00
+## 46            13.9            297.1           2100 2025-06-25 21:00:00
+## 47            14.4               NA           2200 2025-06-25 22:00:00
+## 48            15.0               NA           2300 2025-06-25 23:00:00
+##        data_hora_local
+## 1  2025-06-23 20:00:00
+## 2  2025-06-23 21:00:00
+## 3  2025-06-23 22:00:00
+## 4  2025-06-23 23:00:00
+## 5  2025-06-24 00:00:00
+## 6  2025-06-24 01:00:00
+## 7  2025-06-24 02:00:00
+## 8  2025-06-24 03:00:00
+## 9  2025-06-24 04:00:00
+## 10 2025-06-24 05:00:00
+## 11 2025-06-24 06:00:00
+## 12 2025-06-24 07:00:00
+## 13 2025-06-24 08:00:00
+## 14 2025-06-24 09:00:00
+## 15 2025-06-24 10:00:00
+## 16 2025-06-24 11:00:00
+## 17 2025-06-24 12:00:00
+## 18 2025-06-24 13:00:00
+## 19 2025-06-24 14:00:00
+## 20 2025-06-24 15:00:00
+## 21 2025-06-24 16:00:00
+## 22 2025-06-24 17:00:00
+## 23 2025-06-24 18:00:00
+## 24 2025-06-24 19:00:00
+## 25 2025-06-24 20:00:00
+## 26 2025-06-24 21:00:00
+## 27 2025-06-24 22:00:00
+## 28 2025-06-24 23:00:00
+## 29 2025-06-25 00:00:00
+## 30 2025-06-25 01:00:00
+## 31 2025-06-25 02:00:00
+## 32 2025-06-25 03:00:00
+## 33 2025-06-25 04:00:00
+## 34 2025-06-25 05:00:00
+## 35 2025-06-25 06:00:00
+## 36 2025-06-25 07:00:00
+## 37 2025-06-25 08:00:00
+## 38 2025-06-25 09:00:00
+## 39 2025-06-25 10:00:00
+## 40 2025-06-25 11:00:00
+## 41 2025-06-25 12:00:00
+## 42 2025-06-25 13:00:00
+## 43 2025-06-25 14:00:00
+## 44 2025-06-25 15:00:00
+## 45 2025-06-25 16:00:00
+## 46 2025-06-25 17:00:00
+## 47 2025-06-25 18:00:00
+## 48 2025-06-25 19:00:00
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Seleção do dia de interesse}
+
+\NormalTok{dia\_data1 }\OtherTok{\textless{}{-}}\NormalTok{ dados\_data1[}
+\NormalTok{  dados\_data1}\SpecialCharTok{$}\NormalTok{data\_hora\_local }\SpecialCharTok{\textgreater{}=} \FunctionTok{as.POSIXct}\NormalTok{(}
+\NormalTok{    data1\_1\_utc\_str,}
+    \AttributeTok{tz =} \StringTok{"America/Campo\_Grande"}
+\NormalTok{  ) }\SpecialCharTok{\&}
+\NormalTok{    dados\_data1}\SpecialCharTok{$}\NormalTok{data\_hora\_local }\SpecialCharTok{\textless{}} \FunctionTok{as.POSIXct}\NormalTok{(}
+\NormalTok{      data1\_2\_utc\_str,}
+      \AttributeTok{tz =} \StringTok{"America/Campo\_Grande"}
+\NormalTok{    ),}
+\NormalTok{]}
+\NormalTok{dia\_data2 }\OtherTok{\textless{}{-}}\NormalTok{ dados\_data2[}
+\NormalTok{  dados\_data2}\SpecialCharTok{$}\NormalTok{data\_hora\_local }\SpecialCharTok{\textgreater{}=} \FunctionTok{as.POSIXct}\NormalTok{(}
+\NormalTok{    data2\_1\_utc\_str,}
+    \AttributeTok{tz =} \StringTok{"America/Campo\_Grande"}
+\NormalTok{  ) }\SpecialCharTok{\&}
+\NormalTok{    dados\_data2}\SpecialCharTok{$}\NormalTok{data\_hora\_local }\SpecialCharTok{\textless{}} \FunctionTok{as.POSIXct}\NormalTok{(}
+\NormalTok{      data2\_2\_utc\_str,}
+      \AttributeTok{tz =} \StringTok{"America/Campo\_Grande"}
+\NormalTok{    ),}
+\NormalTok{]}
+
+\NormalTok{dia\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 5  08/06/2025      400          22.9              23.0              22.9
+## 6  08/06/2025      500          22.7              22.9              22.7
+## 7  08/06/2025      600          22.7              22.8              22.6
+## 8  08/06/2025      700          22.4              22.9              22.4
+## 9  08/06/2025      800          22.1              22.4              22.1
+## 10 08/06/2025      900          22.2              22.2              22.0
+## 11 08/06/2025     1000          21.9              22.3              21.9
+## 12 08/06/2025     1100          21.7              21.9              21.7
+## 13 08/06/2025     1200          22.1              22.1              21.7
+## 14 08/06/2025     1300          22.0              22.4              22.0
+## 15 08/06/2025     1400          21.9              22.2              21.5
+## 16 08/06/2025     1500          20.9              21.9              20.4
+## 17 08/06/2025     1600          21.9              22.2              20.9
+## 18 08/06/2025     1700          22.5              22.5              21.7
+## 19 08/06/2025     1800          22.3              22.6              22.3
+## 20 08/06/2025     1900          22.4              22.4              22.2
+## 21 08/06/2025     2000          22.2              22.5              22.2
+## 22 08/06/2025     2100          21.9              22.2              21.8
+## 23 08/06/2025     2200          21.7              21.9              21.6
+## 24 08/06/2025     2300          21.7              21.7              21.6
+## 25 09/06/2025        0          21.2              21.8              21.2
+## 26 09/06/2025      100          21.7              21.7              21.1
+## 27 09/06/2025      200          20.9              21.7              20.9
+## 28 09/06/2025      300          20.2              20.9              20.2
+##    ponto_orvalho_C irradiacao_kJ_m2 hora_UTC_texto       data_hora_UTC
+## 5             20.7               NA           0400 2025-06-08 04:00:00
+## 6             20.8               NA           0500 2025-06-08 05:00:00
+## 7             20.8               NA           0600 2025-06-08 06:00:00
+## 8             20.9               NA           0700 2025-06-08 07:00:00
+## 9             20.7               NA           0800 2025-06-08 08:00:00
+## 10            20.8               NA           0900 2025-06-08 09:00:00
+## 11            20.6               NA           1000 2025-06-08 10:00:00
+## 12            20.5              3.8           1100 2025-06-08 11:00:00
+## 13            20.9            140.9           1200 2025-06-08 12:00:00
+## 14            20.2            239.8           1300 2025-06-08 13:00:00
+## 15            20.2            267.1           1400 2025-06-08 14:00:00
+## 16            19.7            234.9           1500 2025-06-08 15:00:00
+## 17            19.4           1013.6           1600 2025-06-08 16:00:00
+## 18            19.1            641.2           1700 2025-06-08 17:00:00
+## 19            19.5            531.5           1800 2025-06-08 18:00:00
+## 20            19.6            244.8           1900 2025-06-08 19:00:00
+## 21            19.9            297.8           2000 2025-06-08 20:00:00
+## 22            19.9             61.0           2100 2025-06-08 21:00:00
+## 23            20.2               NA           2200 2025-06-08 22:00:00
+## 24            20.1               NA           2300 2025-06-08 23:00:00
+## 25            19.9               NA           0000 2025-06-09 00:00:00
+## 26            20.2               NA           0100 2025-06-09 01:00:00
+## 27            18.7               NA           0200 2025-06-09 02:00:00
+## 28            18.1               NA           0300 2025-06-09 03:00:00
+##        data_hora_local
+## 5  2025-06-08 00:00:00
+## 6  2025-06-08 01:00:00
+## 7  2025-06-08 02:00:00
+## 8  2025-06-08 03:00:00
+## 9  2025-06-08 04:00:00
+## 10 2025-06-08 05:00:00
+## 11 2025-06-08 06:00:00
+## 12 2025-06-08 07:00:00
+## 13 2025-06-08 08:00:00
+## 14 2025-06-08 09:00:00
+## 15 2025-06-08 10:00:00
+## 16 2025-06-08 11:00:00
+## 17 2025-06-08 12:00:00
+## 18 2025-06-08 13:00:00
+## 19 2025-06-08 14:00:00
+## 20 2025-06-08 15:00:00
+## 21 2025-06-08 16:00:00
+## 22 2025-06-08 17:00:00
+## 23 2025-06-08 18:00:00
+## 24 2025-06-08 19:00:00
+## 25 2025-06-08 20:00:00
+## 26 2025-06-08 21:00:00
+## 27 2025-06-08 22:00:00
+## 28 2025-06-08 23:00:00
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dia\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 5  24/06/2025      400          11.1              12.1              11.0
+## 6  24/06/2025      500          10.3              11.2              10.3
+## 7  24/06/2025      600           8.3              10.3               8.2
+## 8  24/06/2025      700           7.3               8.3               7.3
+## 9  24/06/2025      800           7.3               7.6               7.3
+## 10 24/06/2025      900           6.3               7.4               6.3
+## 11 24/06/2025     1000           5.6               6.3               5.5
+## 12 24/06/2025     1100           6.7               6.8               5.6
+## 13 24/06/2025     1200           9.8               9.8               6.7
+## 14 24/06/2025     1300          11.8              11.8               9.8
+## 15 24/06/2025     1400          13.8              14.1              11.4
+## 16 24/06/2025     1500          15.9              16.0              13.4
+## 17 24/06/2025     1600          17.0              17.8              15.5
+## 18 24/06/2025     1700          18.3              19.0              17.0
+## 19 24/06/2025     1800          19.3              19.4              18.2
+## 20 24/06/2025     1900          18.9              19.5              18.7
+## 21 24/06/2025     2000          18.5              19.3              18.5
+## 22 24/06/2025     2100          16.1              18.5              16.0
+## 23 24/06/2025     2200          14.1              16.3              14.1
+## 24 24/06/2025     2300          12.1              14.1              11.9
+## 25 25/06/2025        0          10.5              12.0              10.5
+## 26 25/06/2025      100          10.1              10.6              10.0
+## 27 25/06/2025      200           9.6              10.1               9.4
+## 28 25/06/2025      300           9.4               9.6               9.2
+##    ponto_orvalho_C irradiacao_kJ_m2 hora_UTC_texto       data_hora_UTC
+## 5              6.8               NA           0400 2025-06-24 04:00:00
+## 6              5.4               NA           0500 2025-06-24 05:00:00
+## 7              5.5               NA           0600 2025-06-24 06:00:00
+## 8              5.3               NA           0700 2025-06-24 07:00:00
+## 9              5.6               NA           0800 2025-06-24 08:00:00
+## 10             5.0               NA           0900 2025-06-24 09:00:00
+## 11             4.3               NA           1000 2025-06-24 10:00:00
+## 12             3.4            126.8           1100 2025-06-24 11:00:00
+## 13             2.9            737.8           1200 2025-06-24 12:00:00
+## 14             1.8           1430.1           1300 2025-06-24 13:00:00
+## 15             1.5           1994.6           1400 2025-06-24 14:00:00
+## 16             0.5           2457.4           1500 2025-06-24 15:00:00
+## 17            -0.5           2645.1           1600 2025-06-24 16:00:00
+## 18            -0.5           2595.8           1700 2025-06-24 17:00:00
+## 19            -1.5           2314.0           1800 2025-06-24 18:00:00
+## 20            -1.5           1813.6           1900 2025-06-24 19:00:00
+## 21            -2.6           1103.5           2000 2025-06-24 20:00:00
+## 22             0.8            324.9           2100 2025-06-24 21:00:00
+## 23             2.2               NA           2200 2025-06-24 22:00:00
+## 24             4.2               NA           2300 2025-06-24 23:00:00
+## 25             4.2               NA           0000 2025-06-25 00:00:00
+## 26             2.8               NA           0100 2025-06-25 01:00:00
+## 27             2.3               NA           0200 2025-06-25 02:00:00
+## 28             2.5               NA           0300 2025-06-25 03:00:00
+##        data_hora_local
+## 5  2025-06-24 00:00:00
+## 6  2025-06-24 01:00:00
+## 7  2025-06-24 02:00:00
+## 8  2025-06-24 03:00:00
+## 9  2025-06-24 04:00:00
+## 10 2025-06-24 05:00:00
+## 11 2025-06-24 06:00:00
+## 12 2025-06-24 07:00:00
+## 13 2025-06-24 08:00:00
+## 14 2025-06-24 09:00:00
+## 15 2025-06-24 10:00:00
+## 16 2025-06-24 11:00:00
+## 17 2025-06-24 12:00:00
+## 18 2025-06-24 13:00:00
+## 19 2025-06-24 14:00:00
+## 20 2025-06-24 15:00:00
+## 21 2025-06-24 16:00:00
+## 22 2025-06-24 17:00:00
+## 23 2025-06-24 18:00:00
+## 24 2025-06-24 19:00:00
+## 25 2025-06-24 20:00:00
+## 26 2025-06-24 21:00:00
+## 27 2025-06-24 22:00:00
+## 28 2025-06-24 23:00:00
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Tratamento dos dados de irradiação}
+
+\NormalTok{dia\_data1}\SpecialCharTok{$}\NormalTok{irradiacao\_kJ\_m2[}
+  \FunctionTok{is.na}\NormalTok{(dia\_data1}\SpecialCharTok{$}\NormalTok{irradiacao\_kJ\_m2)}
+\NormalTok{] }\OtherTok{\textless{}{-}} \DecValTok{0}
+
+\NormalTok{dia\_data2}\SpecialCharTok{$}\NormalTok{irradiacao\_kJ\_m2[}
+  \FunctionTok{is.na}\NormalTok{(dia\_data2}\SpecialCharTok{$}\NormalTok{irradiacao\_kJ\_m2)}
+\NormalTok{] }\OtherTok{\textless{}{-}} \DecValTok{0}
+
+\CommentTok{\# Converter a irradiação de kJ/m² para MJ/m².}
+\CommentTok{\# 1 MJ = 1000 kJ}
+\NormalTok{dia\_data1}\SpecialCharTok{$}\NormalTok{irradiacao\_MJ\_m2 }\OtherTok{\textless{}{-}}
+\NormalTok{  dia\_data1}\SpecialCharTok{$}\NormalTok{irradiacao\_kJ\_m2 }\SpecialCharTok{/} \DecValTok{1000}
+
+\NormalTok{dia\_data2}\SpecialCharTok{$}\NormalTok{irradiacao\_MJ\_m2 }\OtherTok{\textless{}{-}}
+\NormalTok{  dia\_data2}\SpecialCharTok{$}\NormalTok{irradiacao\_kJ\_m2 }\SpecialCharTok{/} \DecValTok{1000}
+
+\NormalTok{dia\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 5  08/06/2025      400          22.9              23.0              22.9
+## 6  08/06/2025      500          22.7              22.9              22.7
+## 7  08/06/2025      600          22.7              22.8              22.6
+## 8  08/06/2025      700          22.4              22.9              22.4
+## 9  08/06/2025      800          22.1              22.4              22.1
+## 10 08/06/2025      900          22.2              22.2              22.0
+## 11 08/06/2025     1000          21.9              22.3              21.9
+## 12 08/06/2025     1100          21.7              21.9              21.7
+## 13 08/06/2025     1200          22.1              22.1              21.7
+## 14 08/06/2025     1300          22.0              22.4              22.0
+## 15 08/06/2025     1400          21.9              22.2              21.5
+## 16 08/06/2025     1500          20.9              21.9              20.4
+## 17 08/06/2025     1600          21.9              22.2              20.9
+## 18 08/06/2025     1700          22.5              22.5              21.7
+## 19 08/06/2025     1800          22.3              22.6              22.3
+## 20 08/06/2025     1900          22.4              22.4              22.2
+## 21 08/06/2025     2000          22.2              22.5              22.2
+## 22 08/06/2025     2100          21.9              22.2              21.8
+## 23 08/06/2025     2200          21.7              21.9              21.6
+## 24 08/06/2025     2300          21.7              21.7              21.6
+## 25 09/06/2025        0          21.2              21.8              21.2
+## 26 09/06/2025      100          21.7              21.7              21.1
+## 27 09/06/2025      200          20.9              21.7              20.9
+## 28 09/06/2025      300          20.2              20.9              20.2
+##    ponto_orvalho_C irradiacao_kJ_m2 hora_UTC_texto       data_hora_UTC
+## 5             20.7              0.0           0400 2025-06-08 04:00:00
+## 6             20.8              0.0           0500 2025-06-08 05:00:00
+## 7             20.8              0.0           0600 2025-06-08 06:00:00
+## 8             20.9              0.0           0700 2025-06-08 07:00:00
+## 9             20.7              0.0           0800 2025-06-08 08:00:00
+## 10            20.8              0.0           0900 2025-06-08 09:00:00
+## 11            20.6              0.0           1000 2025-06-08 10:00:00
+## 12            20.5              3.8           1100 2025-06-08 11:00:00
+## 13            20.9            140.9           1200 2025-06-08 12:00:00
+## 14            20.2            239.8           1300 2025-06-08 13:00:00
+## 15            20.2            267.1           1400 2025-06-08 14:00:00
+## 16            19.7            234.9           1500 2025-06-08 15:00:00
+## 17            19.4           1013.6           1600 2025-06-08 16:00:00
+## 18            19.1            641.2           1700 2025-06-08 17:00:00
+## 19            19.5            531.5           1800 2025-06-08 18:00:00
+## 20            19.6            244.8           1900 2025-06-08 19:00:00
+## 21            19.9            297.8           2000 2025-06-08 20:00:00
+## 22            19.9             61.0           2100 2025-06-08 21:00:00
+## 23            20.2              0.0           2200 2025-06-08 22:00:00
+## 24            20.1              0.0           2300 2025-06-08 23:00:00
+## 25            19.9              0.0           0000 2025-06-09 00:00:00
+## 26            20.2              0.0           0100 2025-06-09 01:00:00
+## 27            18.7              0.0           0200 2025-06-09 02:00:00
+## 28            18.1              0.0           0300 2025-06-09 03:00:00
+##        data_hora_local irradiacao_MJ_m2
+## 5  2025-06-08 00:00:00           0.0000
+## 6  2025-06-08 01:00:00           0.0000
+## 7  2025-06-08 02:00:00           0.0000
+## 8  2025-06-08 03:00:00           0.0000
+## 9  2025-06-08 04:00:00           0.0000
+## 10 2025-06-08 05:00:00           0.0000
+## 11 2025-06-08 06:00:00           0.0000
+## 12 2025-06-08 07:00:00           0.0038
+## 13 2025-06-08 08:00:00           0.1409
+## 14 2025-06-08 09:00:00           0.2398
+## 15 2025-06-08 10:00:00           0.2671
+## 16 2025-06-08 11:00:00           0.2349
+## 17 2025-06-08 12:00:00           1.0136
+## 18 2025-06-08 13:00:00           0.6412
+## 19 2025-06-08 14:00:00           0.5315
+## 20 2025-06-08 15:00:00           0.2448
+## 21 2025-06-08 16:00:00           0.2978
+## 22 2025-06-08 17:00:00           0.0610
+## 23 2025-06-08 18:00:00           0.0000
+## 24 2025-06-08 19:00:00           0.0000
+## 25 2025-06-08 20:00:00           0.0000
+## 26 2025-06-08 21:00:00           0.0000
+## 27 2025-06-08 22:00:00           0.0000
+## 28 2025-06-08 23:00:00           0.0000
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dia\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 5  24/06/2025      400          11.1              12.1              11.0
+## 6  24/06/2025      500          10.3              11.2              10.3
+## 7  24/06/2025      600           8.3              10.3               8.2
+## 8  24/06/2025      700           7.3               8.3               7.3
+## 9  24/06/2025      800           7.3               7.6               7.3
+## 10 24/06/2025      900           6.3               7.4               6.3
+## 11 24/06/2025     1000           5.6               6.3               5.5
+## 12 24/06/2025     1100           6.7               6.8               5.6
+## 13 24/06/2025     1200           9.8               9.8               6.7
+## 14 24/06/2025     1300          11.8              11.8               9.8
+## 15 24/06/2025     1400          13.8              14.1              11.4
+## 16 24/06/2025     1500          15.9              16.0              13.4
+## 17 24/06/2025     1600          17.0              17.8              15.5
+## 18 24/06/2025     1700          18.3              19.0              17.0
+## 19 24/06/2025     1800          19.3              19.4              18.2
+## 20 24/06/2025     1900          18.9              19.5              18.7
+## 21 24/06/2025     2000          18.5              19.3              18.5
+## 22 24/06/2025     2100          16.1              18.5              16.0
+## 23 24/06/2025     2200          14.1              16.3              14.1
+## 24 24/06/2025     2300          12.1              14.1              11.9
+## 25 25/06/2025        0          10.5              12.0              10.5
+## 26 25/06/2025      100          10.1              10.6              10.0
+## 27 25/06/2025      200           9.6              10.1               9.4
+## 28 25/06/2025      300           9.4               9.6               9.2
+##    ponto_orvalho_C irradiacao_kJ_m2 hora_UTC_texto       data_hora_UTC
+## 5              6.8              0.0           0400 2025-06-24 04:00:00
+## 6              5.4              0.0           0500 2025-06-24 05:00:00
+## 7              5.5              0.0           0600 2025-06-24 06:00:00
+## 8              5.3              0.0           0700 2025-06-24 07:00:00
+## 9              5.6              0.0           0800 2025-06-24 08:00:00
+## 10             5.0              0.0           0900 2025-06-24 09:00:00
+## 11             4.3              0.0           1000 2025-06-24 10:00:00
+## 12             3.4            126.8           1100 2025-06-24 11:00:00
+## 13             2.9            737.8           1200 2025-06-24 12:00:00
+## 14             1.8           1430.1           1300 2025-06-24 13:00:00
+## 15             1.5           1994.6           1400 2025-06-24 14:00:00
+## 16             0.5           2457.4           1500 2025-06-24 15:00:00
+## 17            -0.5           2645.1           1600 2025-06-24 16:00:00
+## 18            -0.5           2595.8           1700 2025-06-24 17:00:00
+## 19            -1.5           2314.0           1800 2025-06-24 18:00:00
+## 20            -1.5           1813.6           1900 2025-06-24 19:00:00
+## 21            -2.6           1103.5           2000 2025-06-24 20:00:00
+## 22             0.8            324.9           2100 2025-06-24 21:00:00
+## 23             2.2              0.0           2200 2025-06-24 22:00:00
+## 24             4.2              0.0           2300 2025-06-24 23:00:00
+## 25             4.2              0.0           0000 2025-06-25 00:00:00
+## 26             2.8              0.0           0100 2025-06-25 01:00:00
+## 27             2.3              0.0           0200 2025-06-25 02:00:00
+## 28             2.5              0.0           0300 2025-06-25 03:00:00
+##        data_hora_local irradiacao_MJ_m2
+## 5  2025-06-24 00:00:00           0.0000
+## 6  2025-06-24 01:00:00           0.0000
+## 7  2025-06-24 02:00:00           0.0000
+## 8  2025-06-24 03:00:00           0.0000
+## 9  2025-06-24 04:00:00           0.0000
+## 10 2025-06-24 05:00:00           0.0000
+## 11 2025-06-24 06:00:00           0.0000
+## 12 2025-06-24 07:00:00           0.1268
+## 13 2025-06-24 08:00:00           0.7378
+## 14 2025-06-24 09:00:00           1.4301
+## 15 2025-06-24 10:00:00           1.9946
+## 16 2025-06-24 11:00:00           2.4574
+## 17 2025-06-24 12:00:00           2.6451
+## 18 2025-06-24 13:00:00           2.5958
+## 19 2025-06-24 14:00:00           2.3140
+## 20 2025-06-24 15:00:00           1.8136
+## 21 2025-06-24 16:00:00           1.1035
+## 22 2025-06-24 17:00:00           0.3249
+## 23 2025-06-24 18:00:00           0.0000
+## 24 2025-06-24 19:00:00           0.0000
+## 25 2025-06-24 20:00:00           0.0000
+## 26 2025-06-24 21:00:00           0.0000
+## 27 2025-06-24 22:00:00           0.0000
+## 28 2025-06-24 23:00:00           0.0000
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# RADIAÇÃO SOLAR GLOBAL DIÁRIA (Rs)}
+
+\NormalTok{Rs\_data1 }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(}
+\NormalTok{  dia\_data1}\SpecialCharTok{$}\NormalTok{irradiacao\_MJ\_m2,}
+  \AttributeTok{na.rm =} \ConstantTok{TRUE}
+\NormalTok{)}
+\NormalTok{Rs\_data2 }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(}
+\NormalTok{  dia\_data2}\SpecialCharTok{$}\NormalTok{irradiacao\_MJ\_m2,}
+  \AttributeTok{na.rm =} \ConstantTok{TRUE}
+\NormalTok{)}
+\CommentTok{\# Visualizar os resultados}
+\CommentTok{\# Unidade: MJ/m²/dia}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Radiação solar global diária de data1:"}\NormalTok{, Rs\_data1, }\StringTok{"MJ/m²/dia}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Radiação solar global diária de data1: 3.6764 MJ/m²/dia
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Radiação solar global diária de data2:"}\NormalTok{, Rs\_data2, }\StringTok{"MJ/m²/dia}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Radiação solar global diária de data2: 17.5436 MJ/m²/dia
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# SALDO DE RADIAÇÃO DE ONDAS CURTAS DIÁRIO (Rns)}
+
+\NormalTok{albedo }\OtherTok{\textless{}{-}} \FloatTok{0.23}
+\CommentTok{\# Equação da FAO{-}56:}
+\CommentTok{\# Rns = (1 {-} α) * Rs}
+\NormalTok{Rns\_data1 }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ albedo) }\SpecialCharTok{*}\NormalTok{ Rs\_data1}
+\NormalTok{Rns\_data2 }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ albedo) }\SpecialCharTok{*}\NormalTok{ Rs\_data2}
+
+\CommentTok{\# Visualizar os resultados}
+\CommentTok{\# Unidade: MJ/m²/dia}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Radiação solar de radiação de ondas curtas de data1:"}\NormalTok{, Rs\_data1, }\StringTok{"MJ/m²/dia}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Radiação solar de radiação de ondas curtas de data1: 3.6764 MJ/m²/dia
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Radiação solar de radiação de ondas curtas de data2:"}\NormalTok{, Rs\_data2, }\StringTok{"MJ/m²/dia}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Radiação solar de radiação de ondas curtas de data2: 17.5436 MJ/m²/dia
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# BALANÇO DE ONDAS LONGAS DIÁRIO}
+
+\DocumentationTok{\#\# Pressão real de vapor}
+
+\NormalTok{dia\_data1}\SpecialCharTok{$}\NormalTok{ea\_kPa }\OtherTok{\textless{}{-}} \FloatTok{0.6108} \SpecialCharTok{*} \FunctionTok{exp}\NormalTok{(}
+\NormalTok{  (}\FloatTok{17.27} \SpecialCharTok{*}\NormalTok{ dia\_data1}\SpecialCharTok{$}\NormalTok{ponto\_orvalho\_C) }\SpecialCharTok{/}
+\NormalTok{    (dia\_data1}\SpecialCharTok{$}\NormalTok{ponto\_orvalho\_C }\SpecialCharTok{+} \FloatTok{237.3}\NormalTok{)}
+\NormalTok{)}
+
+\NormalTok{dia\_data2}\SpecialCharTok{$}\NormalTok{ea\_kPa }\OtherTok{\textless{}{-}} \FloatTok{0.6108} \SpecialCharTok{*} \FunctionTok{exp}\NormalTok{(}
+\NormalTok{  (}\FloatTok{17.27} \SpecialCharTok{*}\NormalTok{ dia\_data2}\SpecialCharTok{$}\NormalTok{ponto\_orvalho\_C) }\SpecialCharTok{/}
+\NormalTok{    (dia\_data2}\SpecialCharTok{$}\NormalTok{ponto\_orvalho\_C }\SpecialCharTok{+} \FloatTok{237.3}\NormalTok{)}
+\NormalTok{)}
+
+\NormalTok{dia\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 5  08/06/2025      400          22.9              23.0              22.9
+## 6  08/06/2025      500          22.7              22.9              22.7
+## 7  08/06/2025      600          22.7              22.8              22.6
+## 8  08/06/2025      700          22.4              22.9              22.4
+## 9  08/06/2025      800          22.1              22.4              22.1
+## 10 08/06/2025      900          22.2              22.2              22.0
+## 11 08/06/2025     1000          21.9              22.3              21.9
+## 12 08/06/2025     1100          21.7              21.9              21.7
+## 13 08/06/2025     1200          22.1              22.1              21.7
+## 14 08/06/2025     1300          22.0              22.4              22.0
+## 15 08/06/2025     1400          21.9              22.2              21.5
+## 16 08/06/2025     1500          20.9              21.9              20.4
+## 17 08/06/2025     1600          21.9              22.2              20.9
+## 18 08/06/2025     1700          22.5              22.5              21.7
+## 19 08/06/2025     1800          22.3              22.6              22.3
+## 20 08/06/2025     1900          22.4              22.4              22.2
+## 21 08/06/2025     2000          22.2              22.5              22.2
+## 22 08/06/2025     2100          21.9              22.2              21.8
+## 23 08/06/2025     2200          21.7              21.9              21.6
+## 24 08/06/2025     2300          21.7              21.7              21.6
+## 25 09/06/2025        0          21.2              21.8              21.2
+## 26 09/06/2025      100          21.7              21.7              21.1
+## 27 09/06/2025      200          20.9              21.7              20.9
+## 28 09/06/2025      300          20.2              20.9              20.2
+##    ponto_orvalho_C irradiacao_kJ_m2 hora_UTC_texto       data_hora_UTC
+## 5             20.7              0.0           0400 2025-06-08 04:00:00
+## 6             20.8              0.0           0500 2025-06-08 05:00:00
+## 7             20.8              0.0           0600 2025-06-08 06:00:00
+## 8             20.9              0.0           0700 2025-06-08 07:00:00
+## 9             20.7              0.0           0800 2025-06-08 08:00:00
+## 10            20.8              0.0           0900 2025-06-08 09:00:00
+## 11            20.6              0.0           1000 2025-06-08 10:00:00
+## 12            20.5              3.8           1100 2025-06-08 11:00:00
+## 13            20.9            140.9           1200 2025-06-08 12:00:00
+## 14            20.2            239.8           1300 2025-06-08 13:00:00
+## 15            20.2            267.1           1400 2025-06-08 14:00:00
+## 16            19.7            234.9           1500 2025-06-08 15:00:00
+## 17            19.4           1013.6           1600 2025-06-08 16:00:00
+## 18            19.1            641.2           1700 2025-06-08 17:00:00
+## 19            19.5            531.5           1800 2025-06-08 18:00:00
+## 20            19.6            244.8           1900 2025-06-08 19:00:00
+## 21            19.9            297.8           2000 2025-06-08 20:00:00
+## 22            19.9             61.0           2100 2025-06-08 21:00:00
+## 23            20.2              0.0           2200 2025-06-08 22:00:00
+## 24            20.1              0.0           2300 2025-06-08 23:00:00
+## 25            19.9              0.0           0000 2025-06-09 00:00:00
+## 26            20.2              0.0           0100 2025-06-09 01:00:00
+## 27            18.7              0.0           0200 2025-06-09 02:00:00
+## 28            18.1              0.0           0300 2025-06-09 03:00:00
+##        data_hora_local irradiacao_MJ_m2   ea_kPa
+## 5  2025-06-08 00:00:00           0.0000 2.441544
+## 6  2025-06-08 01:00:00           0.0000 2.456616
+## 7  2025-06-08 02:00:00           0.0000 2.456616
+## 8  2025-06-08 03:00:00           0.0000 2.471770
+## 9  2025-06-08 04:00:00           0.0000 2.441544
+## 10 2025-06-08 05:00:00           0.0000 2.456616
+## 11 2025-06-08 06:00:00           0.0000 2.426552
+## 12 2025-06-08 07:00:00           0.0038 2.411641
+## 13 2025-06-08 08:00:00           0.1409 2.471770
+## 14 2025-06-08 09:00:00           0.2398 2.367388
+## 15 2025-06-08 10:00:00           0.2671 2.367388
+## 16 2025-06-08 11:00:00           0.2349 2.295208
+## 17 2025-06-08 12:00:00           1.0136 2.252831
+## 18 2025-06-08 13:00:00           0.6412 2.211140
+## 19 2025-06-08 14:00:00           0.5315 2.266880
+## 20 2025-06-08 15:00:00           0.2448 2.281006
+## 21 2025-06-08 16:00:00           0.2978 2.323846
+## 22 2025-06-08 17:00:00           0.0610 2.323846
+## 23 2025-06-08 18:00:00           0.0000 2.367388
+## 24 2025-06-08 19:00:00           0.0000 2.352795
+## 25 2025-06-08 20:00:00           0.0000 2.323846
+## 26 2025-06-08 21:00:00           0.0000 2.367388
+## 27 2025-06-08 22:00:00           0.0000 2.156602
+## 28 2025-06-08 23:00:00           0.0000 2.077003
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dia\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          data hora_UTC temperatura_C temperatura_max_C temperatura_min_C
+## 5  24/06/2025      400          11.1              12.1              11.0
+## 6  24/06/2025      500          10.3              11.2              10.3
+## 7  24/06/2025      600           8.3              10.3               8.2
+## 8  24/06/2025      700           7.3               8.3               7.3
+## 9  24/06/2025      800           7.3               7.6               7.3
+## 10 24/06/2025      900           6.3               7.4               6.3
+## 11 24/06/2025     1000           5.6               6.3               5.5
+## 12 24/06/2025     1100           6.7               6.8               5.6
+## 13 24/06/2025     1200           9.8               9.8               6.7
+## 14 24/06/2025     1300          11.8              11.8               9.8
+## 15 24/06/2025     1400          13.8              14.1              11.4
+## 16 24/06/2025     1500          15.9              16.0              13.4
+## 17 24/06/2025     1600          17.0              17.8              15.5
+## 18 24/06/2025     1700          18.3              19.0              17.0
+## 19 24/06/2025     1800          19.3              19.4              18.2
+## 20 24/06/2025     1900          18.9              19.5              18.7
+## 21 24/06/2025     2000          18.5              19.3              18.5
+## 22 24/06/2025     2100          16.1              18.5              16.0
+## 23 24/06/2025     2200          14.1              16.3              14.1
+## 24 24/06/2025     2300          12.1              14.1              11.9
+## 25 25/06/2025        0          10.5              12.0              10.5
+## 26 25/06/2025      100          10.1              10.6              10.0
+## 27 25/06/2025      200           9.6              10.1               9.4
+## 28 25/06/2025      300           9.4               9.6               9.2
+##    ponto_orvalho_C irradiacao_kJ_m2 hora_UTC_texto       data_hora_UTC
+## 5              6.8              0.0           0400 2025-06-24 04:00:00
+## 6              5.4              0.0           0500 2025-06-24 05:00:00
+## 7              5.5              0.0           0600 2025-06-24 06:00:00
+## 8              5.3              0.0           0700 2025-06-24 07:00:00
+## 9              5.6              0.0           0800 2025-06-24 08:00:00
+## 10             5.0              0.0           0900 2025-06-24 09:00:00
+## 11             4.3              0.0           1000 2025-06-24 10:00:00
+## 12             3.4            126.8           1100 2025-06-24 11:00:00
+## 13             2.9            737.8           1200 2025-06-24 12:00:00
+## 14             1.8           1430.1           1300 2025-06-24 13:00:00
+## 15             1.5           1994.6           1400 2025-06-24 14:00:00
+## 16             0.5           2457.4           1500 2025-06-24 15:00:00
+## 17            -0.5           2645.1           1600 2025-06-24 16:00:00
+## 18            -0.5           2595.8           1700 2025-06-24 17:00:00
+## 19            -1.5           2314.0           1800 2025-06-24 18:00:00
+## 20            -1.5           1813.6           1900 2025-06-24 19:00:00
+## 21            -2.6           1103.5           2000 2025-06-24 20:00:00
+## 22             0.8            324.9           2100 2025-06-24 21:00:00
+## 23             2.2              0.0           2200 2025-06-24 22:00:00
+## 24             4.2              0.0           2300 2025-06-24 23:00:00
+## 25             4.2              0.0           0000 2025-06-25 00:00:00
+## 26             2.8              0.0           0100 2025-06-25 01:00:00
+## 27             2.3              0.0           0200 2025-06-25 02:00:00
+## 28             2.5              0.0           0300 2025-06-25 03:00:00
+##        data_hora_local irradiacao_MJ_m2    ea_kPa
+## 5  2025-06-24 00:00:00           0.0000 0.9881826
+## 6  2025-06-24 01:00:00           0.0000 0.8969694
+## 7  2025-06-24 02:00:00           0.0000 0.9032292
+## 8  2025-06-24 03:00:00           0.0000 0.8907479
+## 9  2025-06-24 04:00:00           0.0000 0.9095275
+## 10 2025-06-24 05:00:00           0.0000 0.8723110
+## 11 2025-06-24 06:00:00           0.0000 0.8305941
+## 12 2025-06-24 07:00:00           0.1268 0.7795497
+## 13 2025-06-24 08:00:00           0.7378 0.7524052
+## 14 2025-06-24 09:00:00           1.4301 0.6956051
+## 15 2025-06-24 10:00:00           1.9946 0.6807870
+## 16 2025-06-24 11:00:00           2.4574 0.6333870
+## 17 2025-06-24 12:00:00           2.6451 0.5889282
+## 18 2025-06-24 13:00:00           2.5958 0.5889282
+## 19 2025-06-24 14:00:00           2.3140 0.5472521
+## 20 2025-06-24 15:00:00           1.8136 0.5472521
+## 21 2025-06-24 16:00:00           1.1035 0.5044421
+## 22 2025-06-24 17:00:00           0.3249 0.6472908
+## 23 2025-06-24 18:00:00           0.0000 0.7158054
+## 24 2025-06-24 19:00:00           0.0000 0.8247806
+## 25 2025-06-24 20:00:00           0.0000 0.8247806
+## 26 2025-06-24 21:00:00           0.0000 0.7470775
+## 27 2025-06-24 22:00:00           0.0000 0.7209358
+## 28 2025-06-24 23:00:00           0.0000 0.7312939
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Pressão real de vapor média diária}
+
+\NormalTok{ea\_data1 }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(}
+\NormalTok{  dia\_data1}\SpecialCharTok{$}\NormalTok{ea\_kPa,}
+  \AttributeTok{na.rm =} \ConstantTok{TRUE}
+\NormalTok{)}
+\NormalTok{ea\_data2 }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(}
+\NormalTok{  dia\_data2}\SpecialCharTok{$}\NormalTok{ea\_kPa,}
+  \AttributeTok{na.rm =} \ConstantTok{TRUE}
+\NormalTok{)}
+
+\NormalTok{ea\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2.348718
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ea\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.7425859
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Temperaturas máxima e mínima diárias}
+
+\NormalTok{Tmax\_data1\_C }\OtherTok{\textless{}{-}} \FunctionTok{max}\NormalTok{(}
+\NormalTok{  dia\_data1}\SpecialCharTok{$}\NormalTok{temperatura\_max\_C,}
+  \AttributeTok{na.rm =} \ConstantTok{TRUE}
+\NormalTok{)}
+\NormalTok{Tmin\_data1\_C }\OtherTok{\textless{}{-}} \FunctionTok{min}\NormalTok{(}
+\NormalTok{  dia\_data1}\SpecialCharTok{$}\NormalTok{temperatura\_min\_C,}
+  \AttributeTok{na.rm =} \ConstantTok{TRUE}
+\NormalTok{)}
+\NormalTok{Tmax\_data2\_C }\OtherTok{\textless{}{-}} \FunctionTok{max}\NormalTok{(}
+\NormalTok{  dia\_data2}\SpecialCharTok{$}\NormalTok{temperatura\_max\_C,}
+  \AttributeTok{na.rm =} \ConstantTok{TRUE}
+\NormalTok{)}
+\NormalTok{Tmin\_data2\_C }\OtherTok{\textless{}{-}} \FunctionTok{min}\NormalTok{(}
+\NormalTok{  dia\_data2}\SpecialCharTok{$}\NormalTok{temperatura\_min\_C,}
+  \AttributeTok{na.rm =} \ConstantTok{TRUE}
+\NormalTok{)}
+\CommentTok{\# Converter de °C para Kelvin}
+\NormalTok{Tmax\_data1\_K }\OtherTok{\textless{}{-}}\NormalTok{ Tmax\_data1\_C }\SpecialCharTok{+} \FloatTok{273.16}
+\NormalTok{Tmin\_data1\_K }\OtherTok{\textless{}{-}}\NormalTok{ Tmin\_data1\_C }\SpecialCharTok{+} \FloatTok{273.16}
+
+\NormalTok{Tmax\_data2\_K }\OtherTok{\textless{}{-}}\NormalTok{ Tmax\_data2\_C }\SpecialCharTok{+} \FloatTok{273.16}
+\NormalTok{Tmin\_data2\_K }\OtherTok{\textless{}{-}}\NormalTok{ Tmin\_data2\_C }\SpecialCharTok{+} \FloatTok{273.16}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# CÁLCULO DA RADIAÇÃO EXTRATERRESTRE Ra }
+
+\DocumentationTok{\#\# Número do dia do ano (NDA)}
+
+\CommentTok{\# Criar as datas}
+\NormalTok{data\_data1 }\OtherTok{\textless{}{-}} \FunctionTok{as.Date}\NormalTok{(data1\_utc\_str)}
+\NormalTok{data\_data2 }\OtherTok{\textless{}{-}} \FunctionTok{as.Date}\NormalTok{(data2\_utc\_str)}
+\CommentTok{\# Calcular o número do dia do ano}
+\CommentTok{\# format(..., "\%j") retorna o dia do ano juliano. }
+\CommentTok{\# as.numeric() transforma o resultado em número.}
+\NormalTok{NDA\_data1 }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(}
+  \FunctionTok{format}\NormalTok{(data\_data1, }\StringTok{"\%j"}\NormalTok{)}
+\NormalTok{)}
+\NormalTok{NDA\_data2 }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(}
+  \FunctionTok{format}\NormalTok{(data\_data2, }\StringTok{"\%j"}\NormalTok{)}
+\NormalTok{)}
+\CommentTok{\# Visualizar os resultados}
+\NormalTok{NDA\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 159
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{NDA\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 175
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Distância relativa inversa terra{-}sol}
+
+\NormalTok{dr\_data1 }\OtherTok{\textless{}{-}} \DecValTok{1} \SpecialCharTok{+} \FloatTok{0.033} \SpecialCharTok{*} \FunctionTok{cos}\NormalTok{(}
+\NormalTok{  (}\DecValTok{2} \SpecialCharTok{*}\NormalTok{ pi }\SpecialCharTok{/} \DecValTok{365}\NormalTok{) }\SpecialCharTok{*}\NormalTok{ NDA\_data1}
+\NormalTok{)}
+\NormalTok{dr\_data2 }\OtherTok{\textless{}{-}} \DecValTok{1} \SpecialCharTok{+} \FloatTok{0.033} \SpecialCharTok{*} \FunctionTok{cos}\NormalTok{(}
+\NormalTok{  (}\DecValTok{2} \SpecialCharTok{*}\NormalTok{ pi }\SpecialCharTok{/} \DecValTok{365}\NormalTok{) }\SpecialCharTok{*}\NormalTok{ NDA\_data2}
+\NormalTok{)}
+\CommentTok{\# Visualizar os resultados}
+\NormalTok{dr\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.9696636
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dr\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.9672746
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Declinação. solar}
+
+\NormalTok{delta\_data1 }\OtherTok{\textless{}{-}} \FloatTok{0.409} \SpecialCharTok{*} \FunctionTok{sin}\NormalTok{(}
+\NormalTok{  (}\DecValTok{2} \SpecialCharTok{*}\NormalTok{ pi }\SpecialCharTok{/} \DecValTok{365}\NormalTok{) }\SpecialCharTok{*}\NormalTok{ NDA\_data1 }\SpecialCharTok{{-}} \FloatTok{1.39}
+\NormalTok{)}
+\NormalTok{delta\_data2 }\OtherTok{\textless{}{-}} \FloatTok{0.409} \SpecialCharTok{*} \FunctionTok{sin}\NormalTok{(}
+\NormalTok{  (}\DecValTok{2} \SpecialCharTok{*}\NormalTok{ pi }\SpecialCharTok{/} \DecValTok{365}\NormalTok{) }\SpecialCharTok{*}\NormalTok{ NDA\_data2 }\SpecialCharTok{{-}} \FloatTok{1.39}
+\NormalTok{)}
+\CommentTok{\# Visualizar os resultados}
+\NormalTok{delta\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.3988057
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{delta\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.4084537
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Ângulo horário do pôr do sol}
+
+\NormalTok{latitude\_graus }\OtherTok{\textless{}{-}} \SpecialCharTok{{-}}\FloatTok{20.47}
+\CommentTok{\# Converter a latitude de graus para radianos}
+\CommentTok{\# As funções trigonométricas do R utilizam radianos.}
+\NormalTok{latitude\_rad }\OtherTok{\textless{}{-}}\NormalTok{ latitude\_graus }\SpecialCharTok{*}\NormalTok{ pi }\SpecialCharTok{/} \DecValTok{180}
+\CommentTok{\# Calcular o ângulo horário do pôr do sol (ws)}
+\CommentTok{\# acos() é a função arco{-}cosseno.}
+\NormalTok{ws\_data1 }\OtherTok{\textless{}{-}} \FunctionTok{acos}\NormalTok{(}
+  \SpecialCharTok{{-}}\FunctionTok{tan}\NormalTok{(latitude\_rad) }\SpecialCharTok{*} \FunctionTok{tan}\NormalTok{(delta\_data1)}
+\NormalTok{)}
+\NormalTok{ws\_data2 }\OtherTok{\textless{}{-}} \FunctionTok{acos}\NormalTok{(}
+  \SpecialCharTok{{-}}\FunctionTok{tan}\NormalTok{(latitude\_rad) }\SpecialCharTok{*} \FunctionTok{tan}\NormalTok{(delta\_data2)}
+\NormalTok{)}
+\CommentTok{\# Visualizar os resultados}
+\NormalTok{ws\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.412842
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ws\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.408528
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Radiação extraterreste diária (Ra)}
+
+\NormalTok{Gsc }\OtherTok{\textless{}{-}} \FloatTok{0.0820}
+\CommentTok{\# Calcular a radiação extraterrestre diária (Ra)}
+\CommentTok{\# O resultado será obtido em MJ/m²/dia.}
+\NormalTok{Ra\_data1 }\OtherTok{\textless{}{-}}\NormalTok{ (}
+\NormalTok{  (}\DecValTok{24} \SpecialCharTok{*} \DecValTok{60}\NormalTok{) }\SpecialCharTok{/}\NormalTok{ pi}
+\NormalTok{) }\SpecialCharTok{*}\NormalTok{ Gsc }\SpecialCharTok{*}\NormalTok{ dr\_data1 }\SpecialCharTok{*}\NormalTok{ (}
+\NormalTok{  ws\_data1 }\SpecialCharTok{*} \FunctionTok{sin}\NormalTok{(latitude\_rad) }\SpecialCharTok{*} \FunctionTok{sin}\NormalTok{(delta\_data1) }\SpecialCharTok{+}
+    \FunctionTok{cos}\NormalTok{(latitude\_rad) }\SpecialCharTok{*} \FunctionTok{cos}\NormalTok{(delta\_data1) }\SpecialCharTok{*} \FunctionTok{sin}\NormalTok{(ws\_data1)}
+\NormalTok{)}
+\NormalTok{Ra\_data2 }\OtherTok{\textless{}{-}}\NormalTok{ (}
+\NormalTok{  (}\DecValTok{24} \SpecialCharTok{*} \DecValTok{60}\NormalTok{) }\SpecialCharTok{/}\NormalTok{ pi}
+\NormalTok{) }\SpecialCharTok{*}\NormalTok{ Gsc }\SpecialCharTok{*}\NormalTok{ dr\_data2 }\SpecialCharTok{*}\NormalTok{ (}
+\NormalTok{  ws\_data2 }\SpecialCharTok{*} \FunctionTok{sin}\NormalTok{(latitude\_rad) }\SpecialCharTok{*} \FunctionTok{sin}\NormalTok{(delta\_data2) }\SpecialCharTok{+}
+    \FunctionTok{cos}\NormalTok{(latitude\_rad) }\SpecialCharTok{*} \FunctionTok{cos}\NormalTok{(delta\_data2) }\SpecialCharTok{*} \FunctionTok{sin}\NormalTok{(ws\_data2)}
+\NormalTok{)}
+
+\CommentTok{\# Visualizar os resultados}
+\NormalTok{Ra\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 24.08057
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Ra\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 23.73469
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# RADIAÇÃO SOLAR DE CÉU CLARO}
+
+\NormalTok{z }\OtherTok{\textless{}{-}} \DecValTok{150}
+\NormalTok{Rso\_data1 }\OtherTok{\textless{}{-}}\NormalTok{ (}\FloatTok{0.75} \SpecialCharTok{+} \FloatTok{2e{-}5} \SpecialCharTok{*}\NormalTok{ z) }\SpecialCharTok{*}\NormalTok{ Ra\_data1}
+\NormalTok{Rso\_data2 }\OtherTok{\textless{}{-}}\NormalTok{ (}\FloatTok{0.75} \SpecialCharTok{+} \FloatTok{2e{-}5} \SpecialCharTok{*}\NormalTok{ z) }\SpecialCharTok{*}\NormalTok{ Ra\_data2}
+
+\CommentTok{\# Visualizar os resultados}
+\NormalTok{Rso\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 18.13267
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Rso\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 17.87222
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#=========================================================}
+\CommentTok{\# RAZÃO ENTRE RADIAÇÃO MEDIDA E RADIAÇÃO DE CÉU CLARO}
+\CommentTok{\#=========================================================}
+\CommentTok{\# Rs representa a radiação solar global diária medida pelo INMET.}
+\CommentTok{\# Rso representa a radiação solar esperada na superfície}
+\CommentTok{\# em condições de céu claro.}
+\CommentTok{\# A razão Rs/Rso é utilizada na equação da FAO{-}56}
+\CommentTok{\# para representar o efeito da nebulosidade.}
+\CommentTok{\#Quanto mais próximo de 1 for Rs/Rso, mais próximo o dia esteve das condições}
+\CommentTok{\#de céu claro. Valores menores indicam maior atenuação da radiação solar }
+\CommentTok{\#pela atmosfera, especialmente pela presença de nuvens.}
+\NormalTok{razao\_data1 }\OtherTok{\textless{}{-}}\NormalTok{ Rs\_data1 }\SpecialCharTok{/}\NormalTok{ Rso\_data1}
+\NormalTok{razao\_data2 }\OtherTok{\textless{}{-}}\NormalTok{ Rs\_data2 }\SpecialCharTok{/}\NormalTok{ Rso\_data2}
+\CommentTok{\# Visualizar os resultados}
+\NormalTok{razao\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2027501
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{razao\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.9816128
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# A razão observada Rs/Rso em data2 é inferior a 0,30,}
+\CommentTok{\# indicando condição de forte nebulosidade.}
+\CommentTok{\# Para aplicação da equação da FAO{-}56, adotaremos 0,30}
+\CommentTok{\# como limite inferior para o termo de correção da nebulosidade.}
+\NormalTok{razao\_BOL\_data1 }\OtherTok{\textless{}{-}} \FunctionTok{max}\NormalTok{(}
+  \FloatTok{0.30}\NormalTok{,}
+  \FunctionTok{min}\NormalTok{(razao\_data1, }\FloatTok{1.00}\NormalTok{)}
+\NormalTok{)}
+\NormalTok{razao\_BOL\_data2 }\OtherTok{\textless{}{-}} \FunctionTok{max}\NormalTok{(}
+  \FloatTok{0.30}\NormalTok{,}
+  \FunctionTok{min}\NormalTok{(razao\_data2, }\FloatTok{1.00}\NormalTok{)}
+\NormalTok{)}
+\NormalTok{razao\_BOL\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{razao\_BOL\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.9816128
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#=========================================================}
+\CommentTok{\# BALANÇO LÍQUIDO DE ONDAS LONGAS {-} FAO{-}56}
+\CommentTok{\#=========================================================}
+\CommentTok{\# Rnl representa a perda líquida de energia por radiação}
+\CommentTok{\# de ondas longas.}
+\CommentTok{\# Unidade: MJ/m²/dia}
+\CommentTok{\# sigma = constante de Stefan{-}Boltzmann}
+\CommentTok{\# Tmax e Tmin devem estar em Kelvin}
+\CommentTok{\# ea deve estar em kPa}
+\CommentTok{\# Rs/Rso representa o efeito da nebulosidade}
+\NormalTok{sigma }\OtherTok{\textless{}{-}} \FloatTok{4.903e{-}9}
+
+\CommentTok{\# data1}
+\NormalTok{Rnl\_data1 }\OtherTok{\textless{}{-}}\NormalTok{ sigma }\SpecialCharTok{*}
+\NormalTok{  ((Tmax\_data1\_K}\SpecialCharTok{\^{}}\DecValTok{4} \SpecialCharTok{+}\NormalTok{ Tmin\_data1\_K}\SpecialCharTok{\^{}}\DecValTok{4}\NormalTok{) }\SpecialCharTok{/} \DecValTok{2}\NormalTok{) }\SpecialCharTok{*}
+\NormalTok{  (}\FloatTok{0.34} \SpecialCharTok{{-}} \FloatTok{0.14} \SpecialCharTok{*} \FunctionTok{sqrt}\NormalTok{(ea\_data1)) }\SpecialCharTok{*}
+\NormalTok{  (}\FloatTok{1.35} \SpecialCharTok{*}\NormalTok{ razao\_BOL\_data1 }\SpecialCharTok{{-}} \FloatTok{0.35}\NormalTok{)}
+
+\CommentTok{\# data2}
+\NormalTok{Rnl\_data2 }\OtherTok{\textless{}{-}}\NormalTok{ sigma }\SpecialCharTok{*}
+\NormalTok{  ((Tmax\_data2\_K}\SpecialCharTok{\^{}}\DecValTok{4} \SpecialCharTok{+}\NormalTok{ Tmin\_data2\_K}\SpecialCharTok{\^{}}\DecValTok{4}\NormalTok{) }\SpecialCharTok{/} \DecValTok{2}\NormalTok{) }\SpecialCharTok{*}
+\NormalTok{  (}\FloatTok{0.34} \SpecialCharTok{{-}} \FloatTok{0.14} \SpecialCharTok{*} \FunctionTok{sqrt}\NormalTok{(ea\_data2)) }\SpecialCharTok{*}
+\NormalTok{  (}\FloatTok{1.35} \SpecialCharTok{*}\NormalTok{ razao\_BOL\_data2 }\SpecialCharTok{{-}} \FloatTok{0.35}\NormalTok{)}
+
+\CommentTok{\# Visualizar os resultados}
+\NormalTok{Rnl\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2553893
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Rnl\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 7.009018
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# SALDO DE RADIAÇÃO}
+
+\NormalTok{Rn\_data1 }\OtherTok{\textless{}{-}}\NormalTok{ Rns\_data1 }\SpecialCharTok{{-}}\NormalTok{ Rnl\_data1}
+\NormalTok{Rn\_data2 }\OtherTok{\textless{}{-}}\NormalTok{ Rns\_data2 }\SpecialCharTok{{-}}\NormalTok{ Rnl\_data2}
+
+\CommentTok{\# Visualizar os resultados}
+\CommentTok{\# Unidade: MJ/m²/dia}
+\NormalTok{Rn\_data1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2.575439
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Rn\_data2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 6.499554
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# TABELA{-}RESUMO DO BALANÇO DE RADIAÇÃO}
+
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Unidade dos saldos: MJ/m²/dia}\SpecialCharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Unidade dos saldos: MJ/m²/dia
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{resumo\_radiacao }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \StringTok{"Data"} \OtherTok{=} \FunctionTok{c}\NormalTok{(data1\_str, data2\_str),}
+  \StringTok{"Saldo de ondas curtas"} \OtherTok{=} \FunctionTok{round}\NormalTok{(}
+    \FunctionTok{c}\NormalTok{(Rns\_data1, Rns\_data2),}
+    \DecValTok{2}
+\NormalTok{  ),}
+  \StringTok{"Saldo de ondas longas"} \OtherTok{=} \FunctionTok{round}\NormalTok{(}
+    \FunctionTok{c}\NormalTok{(Rnl\_data1, Rnl\_data2),}
+    \DecValTok{2}
+\NormalTok{  ),}
+  
+  \StringTok{"Saldo de radiação"} \OtherTok{=} \FunctionTok{round}\NormalTok{(}
+    \FunctionTok{c}\NormalTok{(Rn\_data1, Rn\_data2),}
+    \DecValTok{2}
+\NormalTok{  ),}
+  \AttributeTok{check.names =} \ConstantTok{FALSE}
+\NormalTok{)}
+
+\NormalTok{resumo\_radiacao}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##         Data Saldo de ondas curtas Saldo de ondas longas Saldo de radiação
+## 1 08/06/2025                  2.83                  0.26              2.58
+## 2 24/06/2025                 13.51                  7.01              6.50
+\end{verbatim}
+
+\end{document}

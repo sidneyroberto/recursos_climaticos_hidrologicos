@@ -1,0 +1,454 @@
+---
+title: "Script da aula 04"
+output:
+  word_document: default
+  html_document: default
+---
+```{r}
+# Constantes
+data1_str = "08/06/2025"
+data2_str = "24/06/2025"
+data1_utc_str = "2025-06-08"
+data2_utc_str = "2025-02-26"
+data1_1_utc_str = "2025-06-08 00:00:00"
+data1_2_utc_str = "2025-06-09 00:00:00"
+data2_1_utc_str = "2025-06-24 00:00:00"
+data2_2_utc_str = "2025-06-25 00:00:00"
+```
+
+```{r}
+# Importação dos bancos de dados
+data1 <- read.csv2(
+  "aquidauana_junho1.csv",
+  header = TRUE,
+  stringsAsFactors = FALSE,
+  check.names = FALSE,
+  fileEncoding = "UTF-8-BOM"
+)
+
+# Importar os dados de data2
+data2 <- read.csv2(
+  "aquidauana_junho2.csv",
+  header = TRUE,
+  stringsAsFactors = FALSE,
+  check.names = FALSE,
+  fileEncoding = "UTF-8-BOM"
+)
+```
+```{r}
+# Selecionando as variáveis de interesse
+
+dados_data1 <- data.frame(
+  data = data1$Data,
+  hora_UTC = data1$`Hora (UTC)`,
+  temperatura_C = data1$`Temp. Ins. (C)`,
+  temperatura_max_C = data1$`Temp. Max. (C)`,
+  temperatura_min_C = data1$`Temp. Min. (C)`,
+  ponto_orvalho_C = data1$`Pto Orvalho Ins. (C)`,
+  irradiacao_kJ_m2 = data1$`Radiacao (KJ/m²)`
+)
+
+dados_data2 <- data.frame(
+  data = data2$Data,
+  hora_UTC = data2$`Hora (UTC)`,
+  temperatura_C = data2$`Temp. Ins. (C)`,
+  temperatura_max_C = data2$`Temp. Max. (C)`,
+  temperatura_min_C = data2$`Temp. Min. (C)`,
+  ponto_orvalho_C = data2$`Pto Orvalho Ins. (C)`,
+  irradiacao_kJ_m2 = data2$`Radiacao (KJ/m²)`
+)
+
+dados_data1
+dados_data2
+```
+```{r}
+# Conversão de data e hora
+dados_data1$hora_UTC_texto <- sprintf(
+  "%04d",
+  dados_data1$hora_UTC
+)
+dados_data2$hora_UTC_texto <- sprintf(
+  "%04d",
+  dados_data2$hora_UTC
+)
+
+dados_data1
+dados_data2
+```
+```{r}
+# Criação das colunas data e hora UTC
+dados_data1$data_hora_UTC <- as.POSIXct(
+  paste(
+    dados_data1$data,
+    dados_data1$hora_UTC_texto
+  ),
+  format = "%d/%m/%Y %H%M",
+  tz = "UTC"
+)
+dados_data2$data_hora_UTC <- as.POSIXct(
+  paste(
+    dados_data2$data,
+    dados_data2$hora_UTC_texto
+  ),
+  format = "%d/%m/%Y %H%M",
+  tz = "UTC"
+)
+
+dados_data1
+dados_data2
+```
+```{r}
+# Conversão do horário UTC para o horário local
+
+dados_data1$data_hora_local <- as.POSIXct(
+  format(
+    dados_data1$data_hora_UTC,
+    tz = "America/Campo_Grande"
+  ),
+  tz = "America/Campo_Grande"
+)
+dados_data2$data_hora_local <- as.POSIXct(
+  format(
+    dados_data2$data_hora_UTC,
+    tz = "America/Campo_Grande"
+  ),
+  tz = "America/Campo_Grande"
+)
+
+dados_data1
+dados_data2
+```
+```{r}
+# Seleção do dia de interesse
+
+dia_data1 <- dados_data1[
+  dados_data1$data_hora_local >= as.POSIXct(
+    data1_1_utc_str,
+    tz = "America/Campo_Grande"
+  ) &
+    dados_data1$data_hora_local < as.POSIXct(
+      data1_2_utc_str,
+      tz = "America/Campo_Grande"
+    ),
+]
+dia_data2 <- dados_data2[
+  dados_data2$data_hora_local >= as.POSIXct(
+    data2_1_utc_str,
+    tz = "America/Campo_Grande"
+  ) &
+    dados_data2$data_hora_local < as.POSIXct(
+      data2_2_utc_str,
+      tz = "America/Campo_Grande"
+    ),
+]
+
+dia_data1
+dia_data2
+```
+```{r}
+# Tratamento dos dados de irradiação
+
+dia_data1$irradiacao_kJ_m2[
+  is.na(dia_data1$irradiacao_kJ_m2)
+] <- 0
+
+dia_data2$irradiacao_kJ_m2[
+  is.na(dia_data2$irradiacao_kJ_m2)
+] <- 0
+
+# Converter a irradiação de kJ/m² para MJ/m².
+# 1 MJ = 1000 kJ
+dia_data1$irradiacao_MJ_m2 <-
+  dia_data1$irradiacao_kJ_m2 / 1000
+
+dia_data2$irradiacao_MJ_m2 <-
+  dia_data2$irradiacao_kJ_m2 / 1000
+
+dia_data1
+dia_data2
+```
+```{r}
+# RADIAÇÃO SOLAR GLOBAL DIÁRIA (Rs)
+
+Rs_data1 <- sum(
+  dia_data1$irradiacao_MJ_m2,
+  na.rm = TRUE
+)
+Rs_data2 <- sum(
+  dia_data2$irradiacao_MJ_m2,
+  na.rm = TRUE
+)
+# Visualizar os resultados
+# Unidade: MJ/m²/dia
+cat("Radiação solar global diária de data1:", Rs_data1, "MJ/m²/dia\n")
+cat("Radiação solar global diária de data2:", Rs_data2, "MJ/m²/dia\n")
+```
+```{r}
+# SALDO DE RADIAÇÃO DE ONDAS CURTAS DIÁRIO (Rns)
+
+albedo <- 0.23
+# Equação da FAO-56:
+# Rns = (1 - α) * Rs
+Rns_data1 <- (1 - albedo) * Rs_data1
+Rns_data2 <- (1 - albedo) * Rs_data2
+
+# Visualizar os resultados
+# Unidade: MJ/m²/dia
+cat("Radiação solar de radiação de ondas curtas de data1:", Rs_data1, "MJ/m²/dia\n")
+cat("Radiação solar de radiação de ondas curtas de data2:", Rs_data2, "MJ/m²/dia\n")
+```
+```{r}
+# BALANÇO DE ONDAS LONGAS DIÁRIO
+
+## Pressão real de vapor
+
+dia_data1$ea_kPa <- 0.6108 * exp(
+  (17.27 * dia_data1$ponto_orvalho_C) /
+    (dia_data1$ponto_orvalho_C + 237.3)
+)
+
+dia_data2$ea_kPa <- 0.6108 * exp(
+  (17.27 * dia_data2$ponto_orvalho_C) /
+    (dia_data2$ponto_orvalho_C + 237.3)
+)
+
+dia_data1
+dia_data2
+```
+```{r}
+## Pressão real de vapor média diária
+
+ea_data1 <- mean(
+  dia_data1$ea_kPa,
+  na.rm = TRUE
+)
+ea_data2 <- mean(
+  dia_data2$ea_kPa,
+  na.rm = TRUE
+)
+
+ea_data1
+ea_data2
+```
+```{r}
+## Temperaturas máxima e mínima diárias
+
+Tmax_data1_C <- max(
+  dia_data1$temperatura_max_C,
+  na.rm = TRUE
+)
+Tmin_data1_C <- min(
+  dia_data1$temperatura_min_C,
+  na.rm = TRUE
+)
+Tmax_data2_C <- max(
+  dia_data2$temperatura_max_C,
+  na.rm = TRUE
+)
+Tmin_data2_C <- min(
+  dia_data2$temperatura_min_C,
+  na.rm = TRUE
+)
+# Converter de °C para Kelvin
+Tmax_data1_K <- Tmax_data1_C + 273.16
+Tmin_data1_K <- Tmin_data1_C + 273.16
+
+Tmax_data2_K <- Tmax_data2_C + 273.16
+Tmin_data2_K <- Tmin_data2_C + 273.16
+```
+
+```{r}
+# CÁLCULO DA RADIAÇÃO EXTRATERRESTRE Ra 
+
+## Número do dia do ano (NDA)
+
+# Criar as datas
+data_data1 <- as.Date(data1_utc_str)
+data_data2 <- as.Date(data2_utc_str)
+# Calcular o número do dia do ano
+# format(..., "%j") retorna o dia do ano juliano. 
+# as.numeric() transforma o resultado em número.
+NDA_data1 <- as.numeric(
+  format(data_data1, "%j")
+)
+NDA_data2 <- as.numeric(
+  format(data_data2, "%j")
+)
+# Visualizar os resultados
+NDA_data1
+NDA_data2
+```
+```{r}
+## Distância relativa inversa terra-sol
+
+dr_data1 <- 1 + 0.033 * cos(
+  (2 * pi / 365) * NDA_data1
+)
+dr_data2 <- 1 + 0.033 * cos(
+  (2 * pi / 365) * NDA_data2
+)
+# Visualizar os resultados
+dr_data1
+dr_data2
+```
+```{r}
+## Declinação. solar
+
+delta_data1 <- 0.409 * sin(
+  (2 * pi / 365) * NDA_data1 - 1.39
+)
+delta_data2 <- 0.409 * sin(
+  (2 * pi / 365) * NDA_data2 - 1.39
+)
+# Visualizar os resultados
+delta_data1
+delta_data2
+```
+```{r}
+## Ângulo horário do pôr do sol
+
+latitude_graus <- -20.47
+# Converter a latitude de graus para radianos
+# As funções trigonométricas do R utilizam radianos.
+latitude_rad <- latitude_graus * pi / 180
+# Calcular o ângulo horário do pôr do sol (ws)
+# acos() é a função arco-cosseno.
+ws_data1 <- acos(
+  -tan(latitude_rad) * tan(delta_data1)
+)
+ws_data2 <- acos(
+  -tan(latitude_rad) * tan(delta_data2)
+)
+# Visualizar os resultados
+ws_data1
+ws_data2
+```
+```{r}
+## Radiação extraterreste diária (Ra)
+
+Gsc <- 0.0820
+# Calcular a radiação extraterrestre diária (Ra)
+# O resultado será obtido em MJ/m²/dia.
+Ra_data1 <- (
+  (24 * 60) / pi
+) * Gsc * dr_data1 * (
+  ws_data1 * sin(latitude_rad) * sin(delta_data1) +
+    cos(latitude_rad) * cos(delta_data1) * sin(ws_data1)
+)
+Ra_data2 <- (
+  (24 * 60) / pi
+) * Gsc * dr_data2 * (
+  ws_data2 * sin(latitude_rad) * sin(delta_data2) +
+    cos(latitude_rad) * cos(delta_data2) * sin(ws_data2)
+)
+
+# Visualizar os resultados
+Ra_data1
+Ra_data2
+```
+```{r}
+# RADIAÇÃO SOLAR DE CÉU CLARO
+
+z <- 150
+Rso_data1 <- (0.75 + 2e-5 * z) * Ra_data1
+Rso_data2 <- (0.75 + 2e-5 * z) * Ra_data2
+
+# Visualizar os resultados
+Rso_data1
+Rso_data2
+#=========================================================
+# RAZÃO ENTRE RADIAÇÃO MEDIDA E RADIAÇÃO DE CÉU CLARO
+#=========================================================
+# Rs representa a radiação solar global diária medida pelo INMET.
+# Rso representa a radiação solar esperada na superfície
+# em condições de céu claro.
+# A razão Rs/Rso é utilizada na equação da FAO-56
+# para representar o efeito da nebulosidade.
+#Quanto mais próximo de 1 for Rs/Rso, mais próximo o dia esteve das condições
+#de céu claro. Valores menores indicam maior atenuação da radiação solar 
+#pela atmosfera, especialmente pela presença de nuvens.
+razao_data1 <- Rs_data1 / Rso_data1
+razao_data2 <- Rs_data2 / Rso_data2
+# Visualizar os resultados
+razao_data1
+razao_data2
+# A razão observada Rs/Rso em data2 é inferior a 0,30,
+# indicando condição de forte nebulosidade.
+# Para aplicação da equação da FAO-56, adotaremos 0,30
+# como limite inferior para o termo de correção da nebulosidade.
+razao_BOL_data1 <- max(
+  0.30,
+  min(razao_data1, 1.00)
+)
+razao_BOL_data2 <- max(
+  0.30,
+  min(razao_data2, 1.00)
+)
+razao_BOL_data1
+razao_BOL_data2
+#=========================================================
+# BALANÇO LÍQUIDO DE ONDAS LONGAS - FAO-56
+#=========================================================
+# Rnl representa a perda líquida de energia por radiação
+# de ondas longas.
+# Unidade: MJ/m²/dia
+# sigma = constante de Stefan-Boltzmann
+# Tmax e Tmin devem estar em Kelvin
+# ea deve estar em kPa
+# Rs/Rso representa o efeito da nebulosidade
+sigma <- 4.903e-9
+
+# data1
+Rnl_data1 <- sigma *
+  ((Tmax_data1_K^4 + Tmin_data1_K^4) / 2) *
+  (0.34 - 0.14 * sqrt(ea_data1)) *
+  (1.35 * razao_BOL_data1 - 0.35)
+
+# data2
+Rnl_data2 <- sigma *
+  ((Tmax_data2_K^4 + Tmin_data2_K^4) / 2) *
+  (0.34 - 0.14 * sqrt(ea_data2)) *
+  (1.35 * razao_BOL_data2 - 0.35)
+
+# Visualizar os resultados
+Rnl_data1
+Rnl_data2
+```
+```{r}
+# SALDO DE RADIAÇÃO
+
+Rn_data1 <- Rns_data1 - Rnl_data1
+Rn_data2 <- Rns_data2 - Rnl_data2
+
+# Visualizar os resultados
+# Unidade: MJ/m²/dia
+Rn_data1
+Rn_data2
+```
+```{r}
+# TABELA-RESUMO DO BALANÇO DE RADIAÇÃO
+
+cat("Unidade dos saldos: MJ/m²/dia\n\n")
+resumo_radiacao <- data.frame(
+  "Data" = c(data1_str, data2_str),
+  "Saldo de ondas curtas" = round(
+    c(Rns_data1, Rns_data2),
+    2
+  ),
+  "Saldo de ondas longas" = round(
+    c(Rnl_data1, Rnl_data2),
+    2
+  ),
+  
+  "Saldo de radiação" = round(
+    c(Rn_data1, Rn_data2),
+    2
+  ),
+  check.names = FALSE
+)
+
+resumo_radiacao
+```
+
+
+

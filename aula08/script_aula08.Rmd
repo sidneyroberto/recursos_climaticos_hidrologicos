@@ -1,0 +1,1059 @@
+---
+title: "script_aula08"
+output: html_document
+---
+```{r}
+#=========================================================
+# EVAPOTRANSPIRAÇÃO
+# Estação INMET A719 - Aquidauana, MS
+# Ano: 2024/2025
+#=========================================================
+#=========================================================
+# 1. IMPORTAR OS DADOS
+#=========================================================
+# Os dados foram obtidos da estação meteorológica automática
+# do INMET de Aquidauana - MS (A719).
+# As primeiras 8 linhas do arquivo correspondem às informações
+# da estação e, portanto, não fazem parte da tabela de dados.
+dados <- read.csv2(
+  "INMET_CO_MS_A719_AQUIDAUANA_01-01-2024_A_31-12-2024.csv",
+  skip = 8,
+  fileEncoding = "Latin1"
+)
+
+# Visualizar os nomes das variáveis
+names(dados)
+
+# Verificar a estrutura do objeto
+str(dados)
+```
+```{r}
+#=========================================================
+# 2. EXCLUIR A COLUNA VAZIA
+#=========================================================
+# O arquivo do INMET possui uma coluna adicional vazia,
+# denominada "X", gerada durante a importação.
+# Essa coluna não contém dados meteorológicos e será excluída.
+dados$X <- NULL
+```
+
+```{r}
+#=========================================================
+# 3. CRIAR DATA E HORA EM UTC
+#=========================================================
+# Os horários fornecidos pelo INMET estão em UTC.
+# Primeiro, vamos juntar as colunas de data e hora para criar
+# uma única variável contendo data e horário.
+dados$data_hora_UTC <- as.POSIXct(
+  paste(dados$Data, dados$Hora.UTC),
+  format = "%Y/%m/%d %H%M UTC",
+  tz = "UTC"
+)
+```
+
+```{r}
+#=========================================================
+# 4. CONVERTER UTC PARA O HORÁRIO LOCAL
+#=========================================================
+# Converter a data e a hora UTC para o horário local
+# de Aquidauana - MS.
+# Aquidauana utiliza o mesmo fuso horário de Campo Grande.
+# O identificador "America/Campo_Grande" considera as regras
+# históricas oficiais do fuso horário.
+
+dados$data_hora_local <- as.POSIXct(
+  format(
+    dados$data_hora_UTC,
+    tz = "America/Campo_Grande"
+  ),
+  tz = "America/Campo_Grande"
+)
+```
+
+```{r}
+#=========================================================
+# 5. CRIAR A DATA LOCAL
+#=========================================================
+# Como os dados originais estão em UTC, algumas observações
+# podem pertencer ao dia anterior no horário de Aquidauana.
+# Por isso, as análises diárias devem utilizar a data local.
+
+dados$data_local <- as.Date(
+  dados$data_hora_local,
+  tz = "America/Campo_Grande"
+)
+```
+
+```{r}
+#=========================================================
+# 6. FILTRAR O PERÍODO DE ESTUDO
+#=========================================================
+# Após a conversão do horário UTC para o horário local,
+# as primeiras observações do arquivo correspondem ainda
+# ao dia 31/12/2023 em Aquidauana.
+# Como o período de estudo corresponde ao ano de 2024,
+# serão mantidas apenas as observações cuja data local
+# pertence a esse ano.
+dados <- dados[
+  format(dados$data_local, "%Y") == "2024",
+]
+```
+
+```{r}
+#=========================================================
+# 7. IDENTIFICAR E RENOMEAR A TEMPERATURA DO AR
+#=========================================================
+# Visualizar novamente os nomes das variáveis.
+names(dados)
+# Renomear a coluna de temperatura do ar para facilitar
+# sua utilização nas próximas etapas do script.
+names(dados)[
+  names(dados) == "TEMPERATURA.DO.AR...BULBO.SECO..HORARIA...C."
+] <- "temperatura_C"
+```
+
+```{r}
+#=========================================================
+# 8. VERIFICAR A TEMPERATURA DO AR
+#=========================================================
+# Verificar a estrutura da variável.
+str(dados$temperatura_C)
+
+# Resumo dos valores de temperatura.
+summary(dados$temperatura_C)
+
+# Verificar a quantidade de dados ausentes.
+sum(is.na(dados$temperatura_C))
+```
+
+```{r}
+#=========================================================
+# 9. CALCULAR A TEMPERATURA MÉDIA DIÁRIA
+#=========================================================
+# Calcular a temperatura média para cada dia utilizando
+# as observações horárias da estação meteorológica.
+temperatura_diaria <- aggregate(
+  temperatura_C ~ data_local,
+  data = dados,
+  FUN = function(x) mean(x, na.rm = TRUE)
+)
+
+# Renomear a variável.
+names(temperatura_diaria)[
+  names(temperatura_diaria) == "temperatura_C"
+] <- "temperatura_media_C"
+```
+
+```{r}
+#=========================================================
+# 10. CRIAR ANO E MÊS
+#=========================================================
+# Criar as variáveis ano e mês a partir da data local.
+
+temperatura_diaria$ano <- as.numeric(
+  format(temperatura_diaria$data_local, "%Y")
+)
+
+temperatura_diaria$mes <- as.numeric(
+  format(temperatura_diaria$data_local, "%m")
+)
+```
+
+```{r}
+#=========================================================
+# 11. CALCULAR A TEMPERATURA MÉDIA MENSAL
+#=========================================================
+# A temperatura média mensal será utilizada no método
+# de Thornthwaite.
+
+temperatura_mensal <- aggregate(
+  temperatura_media_C ~ ano + mes,
+  data = temperatura_diaria,
+  FUN = function(x) mean(x, na.rm = TRUE)
+)
+```
+
+```{r}
+#=========================================================
+# 12. ETP Thornthwaite
+#=========================================================
+#=========================================================
+# CALCULAR O ÍNDICE TÉRMICO MENSAL (i)
+#=========================================================
+# O método de Thornthwaite utiliza a temperatura média
+# mensal para calcular o índice térmico de cada mês.
+
+temperatura_mensal$i <- (
+  temperatura_mensal$temperatura_media_C / 5
+)^1.514
+# Visualizar os resultados.
+temperatura_mensal
+```
+
+```{r}
+#=========================================================
+# 13. CALCULAR O ÍNDICE TÉRMICO ANUAL (I)
+#=========================================================
+# O índice térmico anual corresponde à soma dos índices
+# térmicos mensais.
+I <- sum(temperatura_mensal$i)
+# Visualizar o resultado.
+I
+```
+```{r}
+#=========================================================
+# 14. CALCULAR O COEFICIENTE "a"
+#=========================================================
+# O coeficiente "a" é calculado a partir do índice
+# térmico anual (I).
+a <- (
+  6.75e-7 * I^3 -
+    7.71e-5 * I^2 +
+    1.792e-2 * I +
+    0.49239
+)
+# Visualizar o resultado.
+a
+```
+```{r}
+#=========================================================
+# 15. CALCULAR A ETP PADRÃO MENSAL
+#=========================================================
+# Para temperaturas médias mensais menores ou iguais a
+# 26 °C, utiliza-se a equação baseada no índice térmico.
+# Para temperaturas médias mensais superiores a 26 °C,
+# utiliza-se a equação específica para temperaturas elevadas.
+
+temperatura_mensal$ETP_padrao <- ifelse(
+  temperatura_mensal$temperatura_media_C > 26,
+  
+  -415.85 +
+    32.24 * temperatura_mensal$temperatura_media_C -
+    0.43 * temperatura_mensal$temperatura_media_C^2,
+  
+  16 * (
+    (10 * temperatura_mensal$temperatura_media_C) / I
+  )^a
+)
+
+# Visualizar os resultados.
+temperatura_mensal
+```
+
+```{r}
+#=========================================================
+# 16. DEFINIR O DIA REPRESENTATIVO DE CADA MÊS
+#=========================================================
+# Para estimar o fotoperíodo médio mensal, será utilizado
+# o dia 15 como dia representativo de cada mês.
+
+temperatura_mensal$data_representativa <- as.Date(
+  paste(
+    temperatura_mensal$ano,
+    temperatura_mensal$mes,
+    15,
+    sep = "-"
+  )
+)
+# Calcular o número do dia do ano (NDA).
+temperatura_mensal$NDA <- as.numeric(
+  format(
+    temperatura_mensal$data_representativa,
+    "%j"
+  )
+)
+```
+
+
+```{r}
+#=========================================================
+# 17. CALCULAR A DECLINAÇÃO SOLAR
+#=========================================================
+# Calcular a declinação solar para o dia representativo
+# de cada mês.
+# A declinação será calculada em radianos.
+temperatura_mensal$declinacao_rad <- 0.409 * sin(
+  (2 * pi / 365) * temperatura_mensal$NDA - 1.39
+)
+```
+
+```{r}
+#=========================================================
+# 18. CONVERTER A LATITUDE PARA RADIANOS
+#=========================================================
+# Latitude da estação meteorológica de Aquidauana - MS.
+
+latitude_graus <- -20.475556
+
+# Converter graus para radianos.
+latitude_rad <- latitude_graus * pi / 180
+latitude_rad
+```
+```{r}
+#=========================================================
+# 19. CALCULAR O ÂNGULO HORÁRIO DO PÔR DO SOL
+#=========================================================
+temperatura_mensal$omega_s <- acos(
+  -tan(latitude_rad) *
+    tan(temperatura_mensal$declinacao_rad)
+)
+```
+
+```{r}
+#=========================================================
+# 20. CALCULAR O FOTOPERÍODO
+#=========================================================
+# Calcular a duração aproximada do dia, em horas,
+# para o dia representativo de cada mês.
+temperatura_mensal$fotoperiodo_h <- (
+  24 / pi
+) * temperatura_mensal$omega_s
+```
+
+```{r}
+#=========================================================
+# 21. CALCULAR O NÚMERO DE DIAS DE CADA MÊS
+#=========================================================
+# Criar a data correspondente ao primeiro dia de cada mês.
+primeiro_dia <- as.Date(
+  paste(
+    temperatura_mensal$ano,
+    temperatura_mensal$mes,
+    1,
+    sep = "-"
+  )
+)
+```
+
+```{r}
+# Criar a data correspondente ao primeiro dia
+# do mês seguinte.
+primeiro_dia_seguinte <- as.Date(
+  seq(
+    primeiro_dia[1],
+    by = "month",
+    length.out = 13
+  )[-1]
+)
+# Número de dias de cada mês.
+temperatura_mensal$ND <- as.numeric(
+  primeiro_dia_seguinte - primeiro_dia
+)
+
+temperatura_mensal[, c("mes", "ND")]
+```
+```{r}
+#=========================================================
+# 22. CORRIGIR A ETP PARA O FOTOPERÍODO E
+#     NÚMERO DE DIAS DO MÊS
+#=========================================================
+# A ETP padrão corresponde a um mês de 30 dias
+# e fotoperíodo de 12 horas.
+# A correção considera o fotoperíodo e o número
+# real de dias de cada mês.
+
+temperatura_mensal$ETP_Thornthwaite <- (
+  temperatura_mensal$ETP_padrao *
+    (temperatura_mensal$fotoperiodo_h / 12) *
+    (temperatura_mensal$ND / 30)
+)
+
+# Visualizar os resultados finais.
+temperatura_mensal[
+  , c(
+    "mes",
+    "temperatura_media_C",
+    "fotoperiodo_h",
+    "ND",
+    "ETP_padrao",
+    "ETP_Thornthwaite"
+  )
+]
+```
+```{r}
+#=========================================================
+# MÉTODO DE HARGREAVES-SAMANI
+#=========================================================
+#=========================================================
+# 23. CALCULAR AS TEMPERATURAS DIÁRIAS
+#=========================================================
+# O método de Hargreaves-Samani utiliza as temperaturas
+# máxima, mínima e média diárias.
+# Temperatura média diária.
+Tmed <- aggregate(
+  temperatura_C ~ data_local,
+  data = dados,
+  FUN = function(x) mean(x, na.rm = TRUE)
+)
+
+# Temperatura máxima diária.
+Tmax <- aggregate(
+  temperatura_C ~ data_local,
+  data = dados,
+  FUN = function(x) max(x, na.rm = TRUE)
+)
+
+# Temperatura mínima diária.
+Tmin <- aggregate(
+  temperatura_C ~ data_local,
+  data = dados,
+  FUN = function(x) min(x, na.rm = TRUE)
+)
+
+# Reunir os resultados em um único data frame.
+temperatura_HS <- data.frame(
+  data_local = Tmed$data_local,
+  Tmed = Tmed$temperatura_C,
+  Tmax = Tmax$temperatura_C,
+  Tmin = Tmin$temperatura_C
+)
+
+head(temperatura_HS)
+```
+
+```{r}
+#=========================================================
+# 24. CALCULAR O NÚMERO DO DIA DO ANO
+#=========================================================
+temperatura_HS$NDA <- as.numeric(
+  format(temperatura_HS$data_local, "%j")
+)
+
+head(
+  temperatura_HS[, c("data_local", "NDA")]
+)
+```
+```{r}
+#=========================================================
+# 25. CALCULAR A DISTÂNCIA RELATIVA TERRA-SOL
+#=========================================================
+temperatura_HS$dr <- 1 + 0.033 * cos(
+  (2 * pi / 365) * temperatura_HS$NDA
+)
+```
+
+```{r}
+#=========================================================
+# 26. CALCULAR A DECLINAÇÃO SOLAR
+#=========================================================
+temperatura_HS$declinacao_rad <- 0.409 * sin(
+  (2 * pi / 365) *
+    temperatura_HS$NDA -
+    1.39
+)
+```
+
+```{r}
+#=========================================================
+# 27. CALCULAR O ÂNGULO HORÁRIO DO PÔR DO SOL
+#=========================================================
+temperatura_HS$omega_s <- acos(
+  -tan(latitude_rad) *
+    tan(temperatura_HS$declinacao_rad)
+)
+```
+
+```{r}
+#=========================================================
+# 28. CALCULAR A RADIAÇÃO EXTRATERRESTRE (Ra)
+#=========================================================
+# A radiação solar extraterrestre é a quantidade de energia solar que 
+# chegaria a uma superfície horizontal localizada no topo da atmosfera terrestre.
+# Ou seja, ela é calculada antes de considerar os efeitos da atmosfera.
+# Constante solar em MJ m-2 min-1.
+Gsc <- 0.0820
+
+temperatura_HS$Ra <- (
+  (24 * 60 / pi) *
+    Gsc *
+    temperatura_HS$dr *
+    (
+      temperatura_HS$omega_s *
+        sin(latitude_rad) *
+        sin(temperatura_HS$declinacao_rad) +
+        cos(latitude_rad) *
+        cos(temperatura_HS$declinacao_rad) *
+        sin(temperatura_HS$omega_s)
+    )
+)
+
+# Conferir.
+head(
+  temperatura_HS[
+    , c("data_local", "Tmed", "Tmax", "Tmin", "Ra")
+  ]
+)
+```
+```{r}
+#=========================================================
+# 29. CONVERTER Ra EM EQUIVALENTE DE EVAPORAÇÃO (Qo)
+#=========================================================
+# A radiação extraterrestre (Ra) foi calculada em
+# MJ m-2 dia-1.
+# Para utilizar a equação de Hargreaves-Samani apresentada
+# na aula, Ra será convertida em equivalente de evaporação
+# (mm dia-1).
+
+temperatura_HS$Qo <- 0.408 * temperatura_HS$Ra
+
+# Conferir.
+head(
+  temperatura_HS[, c("data_local", "Ra", "Qo")]
+)
+```
+```{r}
+#=========================================================
+# 30. CALCULAR A ETo PELO MÉTODO DE HARGREAVES-SAMANI
+#=========================================================
+# Calcular a evapotranspiração de referência (ETo)
+# pelo método de Hargreaves-Samani.
+
+temperatura_HS$ETo_HS <- (
+  0.0023 *
+    temperatura_HS$Qo *
+    (temperatura_HS$Tmax - temperatura_HS$Tmin)^0.5 *
+    (17.8 + temperatura_HS$Tmed)
+)
+```
+
+```{r}
+#=========================================================
+# 31. CRIAR ANO E MÊS
+#=========================================================
+# Criar as variáveis ano e mês a partir da data local
+# para permitir o agrupamento dos valores diários de ETo.
+
+temperatura_HS$ano <- as.numeric(
+  format(temperatura_HS$data_local, "%Y")
+)
+
+temperatura_HS$mes <- as.numeric(
+  format(temperatura_HS$data_local, "%m")
+)
+```
+
+```{r}
+#=========================================================
+# 32. CALCULAR A ETo MENSAL POR HARGREAVES-SAMANI
+#=========================================================
+# A ETo foi calculada diariamente em mm dia-1.
+# Para obter a evapotranspiração total de cada mês,
+# serão somados os valores diários.
+ETo_HS_mensal <- aggregate(
+  ETo_HS ~ ano + mes,
+  data = temperatura_HS,
+  FUN = function(x) sum(x, na.rm = TRUE)
+)
+# Visualizar os resultados.
+ETo_HS_mensal
+```
+```{r}
+#=========================================================
+# MÉTODO DE PENMAN-MONTEITH FAO-56
+#=========================================================
+#=========================================================
+# 33. IDENTIFICAR E RENOMEAR AS VARIÁVEIS METEOROLÓGICAS
+#=========================================================
+# Visualizar os nomes das variáveis disponíveis
+# no arquivo original do INMET.
+names(dados)
+
+# Renomear as variáveis que serão utilizadas no método
+# de Penman-Monteith FAO-56.
+# A função grep() procura um padrão de texto dentro
+# dos nomes das variáveis.
+# Radiação solar global
+names(dados)[
+  grep("RADIACAO.GLOBAL", names(dados))
+] <- "radiacao_kJ_m2"
+
+# Umidade relativa máxima na hora anterior
+names(dados)[
+  grep("UMIDADE.REL..MAX", names(dados))
+] <- "URmax_horaria"
+
+# Umidade relativa mínima na hora anterior
+names(dados)[
+  grep("UMIDADE.REL..MIN", names(dados))
+] <- "URmin_horaria"
+
+
+# Velocidade do vento
+names(dados)[
+  grep("VENTO..VELOCIDADE.HORARIA", names(dados))
+] <- "vento_ms"
+
+# Conferir os novos nomes.
+names(dados)
+```
+```{r}
+#=========================================================
+# 34. CALCULAR A RADIAÇÃO SOLAR GLOBAL DIÁRIA
+#=========================================================
+# A radiação solar global fornecida pelo INMET está em
+# kJ m-2 para cada intervalo horário.
+# Para obter a radiação solar global diária, os valores
+# horários serão somados.
+
+radiacao_diaria <- aggregate(
+  radiacao_kJ_m2 ~ data_local,
+  data = dados,
+  FUN = function(x) sum(x, na.rm = TRUE)
+)
+
+# Converter de kJ m-2 dia-1 para MJ m-2 dia-1.
+
+radiacao_diaria$Rs <- (
+  radiacao_diaria$radiacao_kJ_m2 / 1000
+)
+
+# Conferir.
+head(radiacao_diaria)
+```
+```{r}
+#=========================================================
+# 35. CALCULAR A UMIDADE RELATIVA MÁXIMA E MÍNIMA DIÁRIA
+#=========================================================
+# A variável URmax_horaria representa a maior umidade
+# relativa registrada em cada intervalo horário.
+# Para obter a máxima diária, será selecionado o maior
+# valor registrado ao longo do dia.
+
+URmax <- aggregate(
+  URmax_horaria ~ data_local,
+  data = dados,
+  FUN = function(x) max(x, na.rm = TRUE)
+)
+
+# A variável URmin_horaria representa a menor umidade
+# relativa registrada em cada intervalo horário.
+# Para obter a mínima diária, será selecionado o menor
+# valor registrado ao longo do dia.
+
+URmin <- aggregate(
+  URmin_horaria ~ data_local,
+  data = dados,
+  FUN = function(x) min(x, na.rm = TRUE)
+)
+
+# Renomear as variáveis.
+names(URmax)[
+  names(URmax) == "URmax_horaria"
+] <- "URmax"
+
+names(URmin)[
+  names(URmin) == "URmin_horaria"
+] <- "URmin"
+```
+
+```{r}
+#=========================================================
+# 36. CALCULAR A VELOCIDADE MÉDIA DIÁRIA DO VENTO
+#=========================================================
+# Calcular a velocidade média do vento para cada dia.
+
+vento_diario <- aggregate(
+  vento_ms ~ data_local,
+  data = dados,
+  FUN = function(x) mean(x, na.rm = TRUE)
+)
+
+# Renomear a variável.
+names(vento_diario)[
+  names(vento_diario) == "vento_ms"
+] <- "uz"
+
+# Conferir.
+head(vento_diario)
+```
+```{r}
+#=========================================================
+# 37. REUNIR AS VARIÁVEIS METEOROLÓGICAS DIÁRIAS
+#=========================================================
+# As temperaturas média, máxima e mínima diárias
+# já foram calculadas anteriormente para o método
+# de Hargreaves-Samani.
+# Portanto, essas variáveis serão aproveitadas para
+# o método de Penman-Monteith FAO-56.
+
+dados_FAO <- temperatura_HS[
+  , c(
+    "data_local",
+    "Tmed",
+    "Tmax",
+    "Tmin",
+    "Ra"
+  )
+]
+
+# Adicionar a radiação solar global diária.
+dados_FAO <- merge(
+  dados_FAO,
+  radiacao_diaria[
+    , c("data_local", "Rs")
+  ],
+  by = "data_local"
+)
+
+# Adicionar a umidade relativa máxima diária.
+dados_FAO <- merge(
+  dados_FAO,
+  URmax,
+  by = "data_local"
+)
+
+# Adicionar a umidade relativa mínima diária.
+dados_FAO <- merge(
+  dados_FAO,
+  URmin,
+  by = "data_local"
+)
+
+# Adicionar a velocidade média diária do vento.
+dados_FAO <- merge(
+  dados_FAO,
+  vento_diario,
+  by = "data_local"
+)
+```
+
+```{r}
+#=========================================================
+# 38. CALCULAR A PRESSÃO DE SATURAÇÃO DE VAPOR
+#     PARA Tmax E Tmin
+#=========================================================
+# Calcular a pressão de saturação de vapor para
+# a temperatura máxima diária.
+# Unidade: kPa.
+
+dados_FAO$es_Tmax <- 0.6108 * exp(
+  (17.27 * dados_FAO$Tmax) /
+    (dados_FAO$Tmax + 237.3)
+)
+
+# Calcular a pressão de saturação de vapor para
+# a temperatura mínima diária.
+
+dados_FAO$es_Tmin <- 0.6108 * exp(
+  (17.27 * dados_FAO$Tmin) /
+    (dados_FAO$Tmin + 237.3)
+)
+```
+
+```{r}
+#=========================================================
+# 39. CALCULAR A PRESSÃO MÉDIA DE SATURAÇÃO DE VAPOR (es)
+#=========================================================
+# Calcular a pressão média de saturação de vapor
+# a partir das temperaturas máxima e mínima diárias.
+# Unidade: kPa.
+
+dados_FAO$es <- (
+  dados_FAO$es_Tmax +
+    dados_FAO$es_Tmin
+) / 2
+```
+
+```{r}
+#=========================================================
+# 40. CALCULAR A PRESSÃO REAL DE VAPOR (ea)
+#=========================================================
+# Calcular a pressão real de vapor utilizando
+# as temperaturas máxima e mínima e as umidades
+# relativas máxima e mínima diárias.
+# Unidade: kPa.
+dados_FAO$ea <- (
+  dados_FAO$es_Tmin *
+    (dados_FAO$URmax / 100) +
+    dados_FAO$es_Tmax *
+    (dados_FAO$URmin / 100)
+) / 2
+```
+
+```{r}
+#=========================================================
+# 41. CALCULAR O DÉFICIT DE PRESSÃO DE VAPOR
+#=========================================================
+# Calcular a diferença entre a pressão média de
+# saturação de vapor e a pressão real de vapor.
+
+dados_FAO$DPV <- (
+  dados_FAO$es -
+    dados_FAO$ea
+)
+```
+
+```{r}
+#=========================================================
+# 42. CALCULAR A DECLIVIDADE DA CURVA DE PRESSÃO
+#     DE VAPOR DE SATURAÇÃO (Delta)
+#=========================================================
+# Calcular a pressão de saturação de vapor correspondente
+# à temperatura média diária.
+
+dados_FAO$es_Tmed <- 0.6108 * exp(
+  (17.27 * dados_FAO$Tmed) /
+    (dados_FAO$Tmed + 237.3)
+)
+
+# Calcular a declividade da curva de pressão
+# de vapor de saturação.
+
+dados_FAO$Delta <- (
+  4098 * dados_FAO$es_Tmed
+) / (
+  dados_FAO$Tmed + 237.3
+)^2
+```
+
+```{r}
+#=========================================================
+# 43. CALCULAR A PRESSÃO ATMOSFÉRICA
+#=========================================================
+# Informar a altitude da estação meteorológica
+# A719 - Aquidauana, MS.
+# Unidade: kPa.
+
+altitude <- 151.35
+
+# Calcular a pressão atmosférica em função
+# da altitude da estação.
+
+P <- 101.3 * (
+  (293 - 0.0065 * altitude) / 293
+)^5.26
+
+# Conferir.
+P
+```
+```{r}
+#=========================================================
+# 44. CALCULAR A CONSTANTE PSICROMÉTRICA (gama)
+#=========================================================
+# Calcular a constante psicrométrica a partir
+# da pressão atmosférica.
+# Unidade: kPa °C-1.
+gama <- 0.000665 * P
+
+# Conferir.
+gama
+```
+```{r}
+#=========================================================
+# 45. AJUSTAR A VELOCIDADE DO VENTO PARA 2 m
+#=========================================================
+# A equação de Penman-Monteith FAO-56 utiliza a
+# velocidade do vento a 2 m de altura.
+# Considerando que a velocidade do vento foi medida
+# a 10 m, converter u10 para u2.
+# Unidade: m s-1.
+z <- 10
+
+dados_FAO$u2 <- dados_FAO$uz * (
+  4.87 / log(67.8 * z - 5.42)
+)
+```
+
+```{r}
+#=========================================================
+# 46. CALCULAR A RADIAÇÃO SOLAR EM CÉU CLARO (Rso)
+#=========================================================
+# A radiação solar em céu claro representa a radiação
+# solar que chegaria à superfície em condições de
+# céu sem nuvens.
+# Utilizar a altitude da estação A719 - Aquidauana.
+# Unidade: MJ m-2 dia-1.
+altitude <- 151.35
+
+dados_FAO$Rso <- (
+  (0.75 + 2e-5 * altitude) *
+    dados_FAO$Ra
+)
+```
+
+```{r}
+#=========================================================
+# 47. CALCULAR A RADIAÇÃO LÍQUIDA DE ONDAS CURTAS (Rns)
+#=========================================================
+# A radiação líquida de ondas curtas corresponde à
+# parcela da radiação solar global (Rs) que não é
+# refletida pela superfície.
+# Para a cultura de referência, a FAO-56 adota
+# albedo igual a 0,23.
+# Unidade: MJ m-2 dia-1.
+albedo <- 0.23
+
+dados_FAO$Rns <- (
+  (1 - albedo) *
+    dados_FAO$Rs
+)
+```
+
+```{r}
+#=========================================================
+# 48. CONVERTER AS TEMPERATURAS PARA KELVIN
+#=========================================================
+# Para o cálculo da radiação líquida de ondas longas,
+# as temperaturas máxima e mínima devem ser expressas
+# em Kelvin.
+
+dados_FAO$Tmax_K <- dados_FAO$Tmax + 273.16
+
+dados_FAO$Tmin_K <- dados_FAO$Tmin + 273.16
+```
+
+```{r}
+#=========================================================
+# 49. CALCULAR A RADIAÇÃO LÍQUIDA DE ONDAS LONGAS (Rnl)
+#=========================================================
+# Definir a constante de Stefan-Boltzmann.
+sigma <- 4.903e-9
+
+# Calcular a radiação líquida de ondas longas.
+dados_FAO$Rnl <- (
+  sigma *
+    (
+      (dados_FAO$Tmax_K^4 +
+         dados_FAO$Tmin_K^4) / 2
+    ) *
+    (0.34 - 0.14 * dados_FAO$ea^0.5) *
+    (
+      1.35 * (dados_FAO$Rs / dados_FAO$Rso) -
+        0.35
+    )
+)
+```
+
+```{r}
+#=========================================================
+# 50. CALCULAR O SALDO DE RADIAÇÃO (Rn)
+#=========================================================
+# O saldo de radiação corresponde à diferença entre
+# a radiação líquida de ondas curtas (Rns) e a
+# radiação líquida de ondas longas (Rnl).
+# Unidade: MJ m-2 dia-1.
+
+dados_FAO$Rn <- (
+  dados_FAO$Rns -
+    dados_FAO$Rnl
+)
+```
+
+```{r}
+#=========================================================
+# 51. CALCULAR A ETo PELO MÉTODO DE
+#     PENMAN-MONTEITH FAO-56
+#=========================================================
+# Para cálculos em escala diária, o fluxo de calor
+# no solo (G) pode ser considerado aproximadamente zero.
+# Unidade: mm dia-1.
+G <- 0
+
+# Calcular a evapotranspiração de referência diária.
+
+dados_FAO$ETo_PM <- (
+  (
+    0.408 *
+      dados_FAO$Delta *
+      (dados_FAO$Rn - G)
+  ) +
+    (
+      gama *
+        (900 / (dados_FAO$Tmed + 273)) *
+        dados_FAO$u2 *
+        dados_FAO$DPV
+    )
+) / (
+  dados_FAO$Delta +
+    gama *
+    (1 + 0.34 * dados_FAO$u2)
+)
+```
+
+```{r}
+#=========================================================
+# 52. VERIFICAR OS RESULTADOS DA ETo DIÁRIA
+#=========================================================
+# Observar um resumo estatístico da ETo calculada
+# pelo método de Penman-Monteith FAO-56.
+
+summary(dados_FAO$ETo_PM)
+
+# Verificar a existência de valores ausentes (NA).
+
+sum(is.na(dados_FAO$ETo_PM))
+
+# Verificar os valores mínimo e máximo.
+
+min(
+  dados_FAO$ETo_PM,
+  na.rm = TRUE
+)
+
+max(
+  dados_FAO$ETo_PM,
+  na.rm = TRUE
+)
+# Verificar se existem valores negativos de ETo.
+
+sum(
+  dados_FAO$ETo_PM < 0,
+  na.rm = TRUE
+)
+```
+```{r}
+#=========================================================
+# 53. VERIFICAR A QUANTIDADE DE DIAS
+#=========================================================
+
+nrow(dados_FAO)
+
+range(dados_FAO$data_local)
+```
+```{r}
+#=========================================================
+# 54. CALCULAR A ETo MENSAL POR PENMAN-MONTEITH
+#=========================================================
+# Criar as variáveis ano e mês.
+
+dados_FAO$ano <- as.numeric(
+  format(dados_FAO$data_local, "%Y")
+)
+
+dados_FAO$mes <- as.numeric(
+  format(dados_FAO$data_local, "%m")
+)
+
+# Somar a ETo diária de cada mês.
+
+ETo_PM_mensal <- aggregate(
+  ETo_PM ~ ano + mes,
+  data = dados_FAO,
+  FUN = function(x) sum(x, na.rm = TRUE)
+)
+
+# Conferir.
+ETo_PM_mensal
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

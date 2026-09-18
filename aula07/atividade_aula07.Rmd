@@ -1,0 +1,328 @@
+---
+title: "Solução da atividade da aula 07"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+dados_2024 <- read.csv2(
+  "INMET_CO_MS_A719_AQUIDAUANA_01-01-2024_A_31-12-2024.CSV",
+  skip = 8,
+  fileEncoding = "Latin1"
+)
+dados_2025 <- read.csv2(
+  "INMET_CO_MS_A719_AQUIDAUANA_01-01-2025_A_31-12-2025.CSV",
+  skip = 8,
+  fileEncoding = "Latin1"
+)
+```
+
+```{r}
+# Remover a coluna X dos dois data frames
+dados_2024$X <- NULL
+dados_2025$X <- NULL
+# Verificar novamente as dimensões dos data frames
+dim(dados_2024)
+```
+```{r}
+dim(dados_2025)
+```
+```{r}
+# Selecionar apenas as variáveis de interesse
+dados_2024_prec <- dados_2024[, c(
+  "Data",
+  "Hora.UTC",
+  "PRECIPITAÇÃO.TOTAL..HORÁRIO..mm."
+)]
+
+dados_2025_prec <- dados_2025[, c(
+  "Data",
+  "Hora.UTC",
+  "PRECIPITAÇÃO.TOTAL..HORÁRIO..mm."
+)]
+
+# Renomear as variáveis para facilitar as análises
+names(dados_2024_prec) <- c(
+  "data",
+  "hora_UTC",
+  "precipitacao_mm"
+)
+names(dados_2025_prec) <- c(
+  "data",
+  "hora_UTC",
+  "precipitacao_mm"
+)
+```
+
+```{r}
+# Unificando os dados
+
+dados_prec <- rbind(
+  dados_2024_prec,
+  dados_2025_prec
+)
+# Verificar as dimensões do novo data frame
+dim(dados_prec)
+```
+```{r}
+# Criando a variável data e hora
+dados_prec$data_hora_UTC <- as.POSIXct(
+  paste(
+    dados_prec$data,
+    dados_prec$hora_UTC
+  ),
+  format = "%Y/%m/%d %H%M UTC",
+  tz = "UTC"
+)
+```
+
+```{r}
+# Convertendo o horário UTC para o horário local
+
+dados_prec$data_hora_local <- as.POSIXct(
+  format(
+    dados_prec$data_hora_UTC,
+    tz = "America/Campo_Grande"
+  ),
+  tz = "America/Campo_Grande"
+)
+```
+
+```{r}
+# Verificando a continuidade temporal
+
+sequencia_horaria <- seq(
+  from = min(dados_prec$data_hora_UTC),
+  to = max(dados_prec$data_hora_UTC),
+  by = "hour"
+)
+# Verificar se existem horas ausentes na série.
+setdiff(
+  sequencia_horaria,
+  dados_prec$data_hora_UTC
+)
+```
+```{r}
+# Verificar se existem datas e horas duplicadas.
+
+sum(
+  duplicated(dados_prec$data_hora_UTC)
+)
+```
+```{r}
+# Verificando se existem valores ausentes
+
+sum(is.na(dados_prec$precipitacao_mm))
+```
+```{r}
+# Criação da data local
+dados_prec$data_local <- as.Date(
+  dados_prec$data_hora_local,
+  tz = "America/Campo_Grande"
+)
+```
+
+```{r}
+### Criar a coluna mês
+dados_prec$mes <- substr(dados_prec$data_local, 6, 7)
+dados_prec$ano <- substr(dados_prec$data_local, 1, 4)
+
+## Pegar dados de 2024
+dados_prec_2024 <- dados_prec[dados_prec$ano == 2024, ]
+
+## Pegar dados de 2025
+dados_prec_2025 <- dados_prec[dados_prec$ano == 2025, ]
+```
+
+
+```{r}
+# Calculando a precipitação diária
+
+prec_diaria_2024 <- aggregate(
+  precipitacao_mm ~ data_local,
+  data = dados_prec_2024,
+  FUN = sum,
+  na.rm = TRUE
+)
+
+## Renomeando as colunas
+names(prec_diaria_2024) <- c(
+  "dia",
+  "precipitacao_mm"
+)
+
+prec_diaria_2025 <- aggregate(
+  precipitacao_mm ~ data_local,
+  data = dados_prec_2025,
+  FUN = sum,
+  na.rm = TRUE
+)
+
+## Renomeando as colunas
+names(prec_diaria_2025) <- c(
+  "dia",
+  "precipitacao_mm"
+)
+
+## Juntando tudo
+prec_diaria<- data.frame(
+  dia = c(prec_diaria_2024$dia, prec_diaria_2025$dia),
+  precipitacao_mm = c(
+    prec_diaria_2024$precipitacao_mm,
+    prec_diaria_2025$precipitacao_mm
+  )
+)
+
+dim(prec_diaria)
+```
+```{r}
+# Contando valores ausentes (precipitação diária)
+sum(is.na(prec_diaria$precipitacao_mm))
+```
+```{r}
+# Checando a menor e maior precipitações diárias
+range(prec_diaria$precipitacao_mm)
+```
+```{r}
+# Verificando a data da maior precipitação diária
+
+maior_precipitacao <- max(prec_diaria$precipitacao_mm)
+dia_maior_precipitacao <- prec_diaria[prec_diaria$precipitacao_mm == maior_precipitacao, ]
+dia_maior_precipitacao$dia
+```
+```{r}
+# Verificando se existem valores negativos de precipitação
+length(prec_diaria[prec_diaria$precipitacao_mm < 0])
+```
+
+
+```{r}
+# Cálculo da precipitação mensal
+
+## Agregar as precipitações de 2024 por mês
+prec_mensal_2024 <- aggregate(
+  precipitacao_mm ~ mes,
+  data = dados_prec_2024,
+  FUN = sum,
+  na.rm = TRUE
+)
+
+## Renomeando a coluna
+names(prec_mensal_2024) <- c(
+  "mes",
+  "precipitacao_mm_2024"
+)
+
+## Agregar as precipitações de 2025 por mês
+prec_mensal_2025 <- aggregate(
+  precipitacao_mm ~ mes,
+  data = dados_prec_2025,
+  FUN = sum,
+  na.rm = TRUE
+)
+
+## Renomeando a coluna
+names(prec_mensal_2025) <- c(
+  "mes",
+  "precipitacao_mm_2025"
+)
+
+## Juntando tudo
+prec_mensal <- merge(
+  prec_mensal_2024,
+  prec_mensal_2025,
+  by = "mes"
+)
+
+# Renomeando os meses
+prec_mensal$mes <- c(
+  "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+  "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+)
+
+prec_mensal
+```
+
+```{r}
+# Gerando o gráfico
+
+prec_mensal$mes <- factor(
+  prec_mensal$mes,
+  levels = c(
+    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+    "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+  )
+)
+
+library(tidyr)
+
+prec_long <- prec_mensal |>
+  pivot_longer(
+    cols = c(precipitacao_mm_2024, precipitacao_mm_2025),
+    names_to = "ano",
+    values_to = "precipitacao"
+  )
+
+prec_long$ano <- gsub("precipitacao_mm_", "", prec_long$ano)
+
+library(ggplot2)
+
+ggplot(prec_long, aes(x = mes, y = precipitacao, fill = ano)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Precipitação Acumulada Mensal - 2024 e 2025",
+    x = "Mês",
+    y = "Precipitação acumulada (mm)",
+    fill = "Ano"
+  ) +
+  theme_minimal()
+```
+```{r}
+# Calculando a precipitação anual
+
+## Agregar as precipitações de 2024 por ano
+prec_anual_2024 <- aggregate(
+  precipitacao_mm ~ ano,
+  data = dados_prec_2024,
+  FUN = sum,
+  na.rm = TRUE
+)
+
+## Renomeando a coluna
+names(prec_anual_2024) <- c(
+  "ano",
+  "precipitacao_mm_2024"
+)
+
+## Agregar as precipitações de 2025 por ano
+prec_anual_2025 <- aggregate(
+  precipitacao_mm ~ ano,
+  data = dados_prec_2025,
+  FUN = sum,
+  na.rm = TRUE
+)
+
+## Renomeando a coluna
+names(prec_anual_2025) <- c(
+  "ano",
+  "precipitacao_mm_2025"
+)
+
+## Juntando tudo
+prec_anual <- data.frame(
+  ano = c(2024, 2025),
+  precipitacao_mm = c(
+    prec_anual_2024$precipitacao_mm_2024,
+    prec_anual_2025$precipitacao_mm_2025
+  )
+)
+
+prec_anual
+```
+
+
+
+
+
+

@@ -1,0 +1,199 @@
+---
+title: "Script da Aula 06"
+output: html_document
+---
+```{r}
+#=========================================================
+# ETAPA 1 -
+# IMPORTAÇÃO DOS DADOS DE TEMPERATURA
+#=========================================================
+# Importar os dados horários de temperatura
+dados_temp <- read.csv2(
+  "dados_temperatura_horaria.csv"
+)
+# Importar os dados diários de temperatura
+temperatura_diaria <- read.csv2(
+  "dados_temperatura_diaria.csv"
+)
+# Verificar a estrutura dos dados importados,
+# com atenção especial às variáveis de data e hora.
+str(dados_temp)
+str(temperatura_diaria)
+```
+```{r}
+#=========================================================
+# ETAPA 2 -
+# AJUSTE DO FORMATO DAS DATAS
+#=========================================================
+# Ao exportar e importar os dados em formato CSV,
+# as variáveis de data e data/hora foram importadas
+# como texto (character).
+# Para realizar as análises, é necessário converter
+# novamente essas variáveis para os formatos adequados.
+# POSIXct = data + hora
+# Date    = somente data
+# Converter data e hora local para POSIXct
+dados_temp$data_hora_local <- as.POSIXct(
+  dados_temp$data_hora_local,
+  format = "%Y-%m-%d %H:%M:%S",
+  tz = "America/Campo_Grande"
+)
+# Converter a data local para Date
+dados_temp$data_local <- as.Date(
+  dados_temp$data_local,
+  format = "%Y-%m-%d"
+)
+# Converter a data local para Date
+temperatura_diaria$data_local <- as.Date(
+  temperatura_diaria$data_local,
+  format = "%Y-%m-%d"
+)
+
+# Verificar novamente a estrutura dos dados
+# após as conversões.
+str(dados_temp)
+str(temperatura_diaria)
+```
+```{r}
+#=========================================================
+# HORAS DE FRIO
+#=========================================================
+#=========================================================
+# ETAPA 3 -
+# SELEÇÃO DO PERÍODO DE ANÁLISE
+#=========================================================
+# O Número de Horas de Frio (NHF) corresponde ao número
+# de horas em que a temperatura do ar permanece abaixo
+# de uma determinada temperatura crítica.
+# Neste exercício serão considerados dois limites:
+# - temperatura inferior a 7 °C;
+# - temperatura inferior a 13 °C.
+# Inicialmente, será analisado o período mais frio
+# de 2024, de 1º de maio a 31 de agosto.
+# A seleção é realizada utilizando data_local, pois
+# queremos considerar as datas no horário local de
+# Aquidauana - MS.
+dados_inverno_2024 <- dados_temp[
+  dados_temp$data_local >= as.Date("2024-05-01") &
+    dados_temp$data_local <= as.Date("2024-08-31"),
+]
+```
+
+```{r}
+#=========================================================
+# ETAPA 4 -
+# CÁLCULO DO NÚMERO DE HORAS DE FRIO
+#=========================================================
+# Calcular o número de horas com temperatura
+# inferior a 7 °C.
+NHF_7_2024 <- sum(
+  dados_inverno_2024$temperatura_C < 7,
+  na.rm = TRUE
+)
+NHF_7_2024
+
+# Calcular o número de horas com temperatura
+# inferior a 13 °C.
+NHF_13_2024 <- sum(
+  dados_inverno_2024$temperatura_C < 13,
+  na.rm = TRUE
+)
+NHF_13_2024
+```
+```{r}
+#=========================================================
+# GRAUS-DIA
+#=========================================================
+#=========================================================
+# ETAPA 5 -
+# DEFINIÇÃO DA CULTURA E DO PERÍODO DE ANÁLISE
+# Planejamento do florescimento masculino do milho, com base na semeadura
+#=========================================================
+# Graus-dia representam o acúmulo térmico diário
+# acima da temperatura basal da cultura.
+# O somatório dos graus-dia ao longo do tempo permite
+# acompanhar o desenvolvimento térmico da cultura.
+# Neste exemplo será utilizado o milho AG510.
+# Temperatura basal inferior (Tb) = 10 °C
+# Constante térmica (CT) = 800 °C.d
+# A constante térmica corresponde ao acúmulo de graus-dia
+# necessário entre a semeadura e o florescimento masculino.
+Tb <- 10
+CT <- 800
+# Definir a data de semeadura
+data_semeadura <- as.Date("2024-10-01")
+# Selecionar os dados a partir da data de semeadura.
+dados_gd <- temperatura_diaria[
+  temperatura_diaria$data_local >= data_semeadura &
+    temperatura_diaria$data_local <= as.Date("2024-12-31"),
+]
+```
+
+```{r}
+#=========================================================
+# ETAPA 6 -
+# CÁLCULO DOS GRAUS-DIA DIÁRIOS
+#=========================================================
+# O cálculo dos graus-dia depende da relação entre
+# a temperatura basal (Tb) e as temperaturas mínima
+# e máxima observadas em cada dia.
+# Situação 1:
+# Se Tb < Tmin:
+# GD = Tmed - Tb
+# Situação 2:
+# Se Tmin <= Tb <= Tmax:
+# GD = (Tmax - Tb)^2 / [2 * (Tmax - Tmin)]
+# Situação 3:
+# Se Tb > Tmax:
+# GD = 0
+dados_gd$GD <- ifelse(
+  Tb < dados_gd$temperatura_min_C,
+  # Situação 1
+  dados_gd$temperatura_C - Tb,
+  ifelse(
+    Tb <= dados_gd$temperatura_max_C,
+    # Situação 2
+    (dados_gd$temperatura_max_C - Tb)^2 /
+      (2 * (
+        dados_gd$temperatura_max_C -
+          dados_gd$temperatura_min_C
+      )),
+    # Situação 3
+    0
+  )
+)
+```
+
+```{r}
+#=========================================================
+# ETAPA 7 -
+# CÁLCULO DOS GRAUS-DIA ACUMULADOS
+#=========================================================
+# A função cumsum() calcula a soma acumulada.
+# Assim, cada dia apresenta o total de graus-dia
+# acumulado desde a data de semeadura.
+dados_gd$GDA <- cumsum(
+  dados_gd$GD
+)
+```
+
+```{r}
+#=========================================================
+# ETAPA 8 -
+# IDENTIFICAÇÃO DA DATA EM QUE A CONSTANTE TÉRMICA
+# FOI ATINGIDA
+#=========================================================
+# Identificar a primeira data em que a constante térmica
+# foi atingida.
+data_florescimento <- dados_gd$data_local[
+  which(dados_gd$GDA >= CT)[1]
+]
+data_florescimento
+# Calcular o número de dias decorridos entre a semeadura
+# e o florescimento masculino previsto.
+dias_florescimento <- data_florescimento - data_semeadura
+dias_florescimento
+```
+
+
+

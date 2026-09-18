@@ -1,0 +1,432 @@
+---
+title: "Solução da atividade 06"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+# =========================================================
+# ETAPA 1 - IMPORTAÇÃO DOS DADOS
+# =========================================================
+
+# Dados horários
+dados_temp <- read.csv2(
+  "dados_temperatura_horaria.csv"
+)
+
+# Dados diários
+temperatura_diaria <- read.csv2(
+  "dados_temperatura_diaria.csv"
+)
+```
+
+```{r}
+# =========================================================
+# ETAPA 2 - AJUSTE DAS DATAS
+# =========================================================
+
+# Dados horários
+dados_temp$data_hora_local <- as.POSIXct(
+  dados_temp$data_hora_local,
+  format = "%Y-%m-%d %H:%M:%S",
+  tz = "America/Campo_Grande"
+)
+
+dados_temp$data_local <- as.Date(
+  dados_temp$data_local,
+  format = "%Y-%m-%d"
+)
+
+# Dados diários
+temperatura_diaria$data_local <- as.Date(
+  temperatura_diaria$data_local,
+  format = "%Y-%m-%d"
+)
+```
+
+```{r}
+# =========================================================
+# 1) HORAS DE FRIO
+# =========================================================
+
+
+# ---------------------------------------------------------
+# 1.1 - HORAS DE FRIO EM 2024
+# ---------------------------------------------------------
+
+dados_inverno_2024 <- dados_temp[
+  dados_temp$data_local >= as.Date("2024-05-01") &
+    dados_temp$data_local <= as.Date("2024-08-31"),
+]
+
+
+# Número de horas abaixo de 7 °C
+NHF_7_2024 <- sum(
+  dados_inverno_2024$temperatura_C < 7,
+  na.rm = TRUE
+)
+
+# Número de horas abaixo de 13 °C
+NHF_13_2024 <- sum(
+  dados_inverno_2024$temperatura_C < 13,
+  na.rm = TRUE
+)
+
+
+# Mostrar resultados
+NHF_7_2024
+NHF_13_2024
+```
+```{r}
+# ---------------------------------------------------------
+# 1.2 - HORAS DE FRIO EM 2025
+# ---------------------------------------------------------
+
+# IMPORTANTE:
+# Mantemos os dados de 2024 e criamos um novo objeto
+# para o ano de 2025.
+
+dados_inverno_2025 <- dados_temp[
+  dados_temp$data_local >= as.Date("2025-05-01") &
+    dados_temp$data_local <= as.Date("2025-08-31"),
+]
+
+
+# Número de horas abaixo de 7 °C
+NHF_7_2025 <- sum(
+  dados_inverno_2025$temperatura_C < 7,
+  na.rm = TRUE
+)
+
+# Número de horas abaixo de 13 °C
+NHF_13_2025 <- sum(
+  dados_inverno_2025$temperatura_C < 13,
+  na.rm = TRUE
+)
+
+
+# Mostrar resultados
+NHF_7_2025
+NHF_13_2025
+```
+```{r}
+# ---------------------------------------------------------
+# 1.3 - TABELA COMPARATIVA 2024 x 2025
+# ---------------------------------------------------------
+
+resultado_NHF <- data.frame(
+  Ano = c(2024, 2025),
+  NHF_menor_7 = c(
+    NHF_7_2024,
+    NHF_7_2025
+  ),
+  NHF_menor_13 = c(
+    NHF_13_2024,
+    NHF_13_2025
+  )
+)
+
+# Apresentaando a tabela
+resultado_NHF
+```
+```{r}
+# =========================================================
+# 2) GRAUS-DIA - MILHO AG510
+# =========================================================
+
+# Temperatura basal
+Tb <- 10
+
+# Constante térmica
+CT <- 800
+```
+
+```{r}
+# ---------------------------------------------------------
+# 2.1 - MILHO - SEMEADURA EM 01/10/2024
+# ---------------------------------------------------------
+
+data_semeadura_2024 <- as.Date("2024-10-01")
+
+
+# Selecionar os dados a partir da semeadura
+dados_gd_2024 <- temperatura_diaria[
+  temperatura_diaria$data_local >= data_semeadura_2024 &
+    temperatura_diaria$data_local <= as.Date("2024-12-31"),
+]
+
+
+# Calcular graus-dia
+dados_gd_2024$GD <- ifelse(
+  
+  # Situação 1:
+  # Tb < Tmin
+  Tb < dados_gd_2024$temperatura_min_C,
+  
+  dados_gd_2024$temperatura_C - Tb,
+  
+  ifelse(
+    
+    # Situação 2:
+    # Tmin <= Tb <= Tmax
+    Tb <= dados_gd_2024$temperatura_max_C,
+    
+    (dados_gd_2024$temperatura_max_C - Tb)^2 /
+      (
+        2 *
+          (
+            dados_gd_2024$temperatura_max_C -
+              dados_gd_2024$temperatura_min_C
+          )
+      ),
+    
+    # Situação 3:
+    # Tb > Tmax
+    0
+  )
+)
+
+
+# Calcular graus-dia acumulados
+dados_gd_2024$GDA <- cumsum(
+  dados_gd_2024$GD
+)
+
+
+# Identificar a primeira data em que GDA >= 800
+data_florescimento_2024 <- dados_gd_2024$data_local[
+  which(dados_gd_2024$GDA >= CT)[1]
+]
+
+
+# Número de dias entre semeadura e florescimento
+dias_florescimento_2024 <- 
+  data_florescimento_2024 - data_semeadura_2024
+
+
+# Mostrando os resultados
+data_florescimento_2024
+dias_florescimento_2024
+```
+```{r}
+# ---------------------------------------------------------
+# 2.2 - MILHO - SEMEADURA EM 01/10/2025
+# ---------------------------------------------------------
+
+data_semeadura_2025 <- as.Date("2025-10-01")
+
+
+# Selecionar os dados de 2025
+dados_gd_2025 <- temperatura_diaria[
+  temperatura_diaria$data_local >= data_semeadura_2025 &
+    temperatura_diaria$data_local <= as.Date("2025-12-31"),
+]
+
+
+# Calcular graus-dia
+dados_gd_2025$GD <- ifelse(
+  
+  # Situação 1:
+  # Tb < Tmin
+  Tb < dados_gd_2025$temperatura_min_C,
+  
+  dados_gd_2025$temperatura_C - Tb,
+  
+  ifelse(
+    
+    # Situação 2:
+    # Tmin <= Tb <= Tmax
+    Tb <= dados_gd_2025$temperatura_max_C,
+    
+    (dados_gd_2025$temperatura_max_C - Tb)^2 /
+      (
+        2 *
+          (
+            dados_gd_2025$temperatura_max_C -
+              dados_gd_2025$temperatura_min_C
+          )
+      ),
+    
+    # Situação 3:
+    # Tb > Tmax
+    0
+  )
+)
+
+
+# Calcular graus-dia acumulados
+dados_gd_2025$GDA <- cumsum(
+  dados_gd_2025$GD
+)
+
+
+# Primeira data em que GDA >= 800
+data_florescimento_2025 <- dados_gd_2025$data_local[
+  which(dados_gd_2025$GDA >= CT)[1]
+]
+
+
+# Número de dias entre semeadura e florescimento
+dias_florescimento_2025 <- 
+  data_florescimento_2025 - data_semeadura_2025
+
+
+# Mostrando os resultados
+data_florescimento_2025
+dias_florescimento_2025
+```
+```{r}
+# ---------------------------------------------------------
+# 2.3 - COMPARAÇÃO DOS DOIS ANOS
+# ---------------------------------------------------------
+
+resultado_milho <- data.frame(
+  Ano = c(2024, 2025),
+  
+  Data_semeadura = c(
+    data_semeadura_2024,
+    data_semeadura_2025
+  ),
+  
+  Data_florescimento = c(
+    data_florescimento_2024,
+    data_florescimento_2025
+  ),
+  
+  Dias_ate_florescimento = c(
+    as.numeric(dias_florescimento_2024),
+    as.numeric(dias_florescimento_2025)
+  )
+)
+
+# Apresentando o resultado para a cultivar
+resultado_milho
+```
+```{r}
+# =========================================================
+# 3) PLANEJAMENTO DA SEMEADURA DA SOJA
+# =========================================================
+
+# Data desejada para maturação
+data_maturacao <- as.Date("2025-03-15")
+
+# Temperatura basal da soja
+Tb_soja <- 14
+
+# Constante térmica
+CT_soja <- 1230
+```
+
+```{r}
+# ---------------------------------------------------------
+# 3.1 - SELEÇÃO DOS DADOS
+# ---------------------------------------------------------
+
+# Selecionamos um período suficientemente longo
+# anterior à data de maturação.
+
+dados_soja <- temperatura_diaria[
+  temperatura_diaria$data_local >= as.Date("2024-09-01") &
+    temperatura_diaria$data_local <= data_maturacao,
+]
+```
+
+```{r}
+# ---------------------------------------------------------
+# 3.2 - CÁLCULO DOS GRAUS-DIA
+# ---------------------------------------------------------
+
+dados_soja$GD <- ifelse(
+  
+  # Situação 1:
+  # Tb < Tmin
+  Tb_soja < dados_soja$temperatura_min_C,
+  
+  dados_soja$temperatura_C - Tb_soja,
+  
+  ifelse(
+    
+    # Situação 2:
+    # Tmin <= Tb <= Tmax
+    Tb_soja <= dados_soja$temperatura_max_C,
+    
+    (dados_soja$temperatura_max_C - Tb_soja)^2 /
+      (
+        2 *
+          (
+            dados_soja$temperatura_max_C -
+              dados_soja$temperatura_min_C
+          )
+      ),
+    
+    # Situação 3:
+    # Tb > Tmax
+    0
+  )
+)
+```
+
+```{r}
+# ---------------------------------------------------------
+# 3.3 - ORGANIZAR DO MAIS RECENTE PARA O MAIS ANTIGO
+# ---------------------------------------------------------
+
+dados_soja <- dados_soja[
+  order(
+    dados_soja$data_local,
+    decreasing = TRUE
+  ),
+]
+```
+
+```{r}
+# ---------------------------------------------------------
+# 3.4 - ACÚMULO RETROATIVO DOS GRAUS-DIA
+# ---------------------------------------------------------
+
+dados_soja$GDA_retroativo <- cumsum(
+  dados_soja$GD
+)
+```
+
+```{r}
+# ---------------------------------------------------------
+# 3.5 - IDENTIFICAR A DATA DE SEMEADURA
+# ---------------------------------------------------------
+
+data_semeadura_soja <- dados_soja$data_local[
+  which(dados_soja$GDA_retroativo >= CT_soja)[1]
+]
+
+
+# Mostrar a data estimada
+data_semeadura_soja
+```
+```{r}
+# ---------------------------------------------------------
+# 3.6 - NÚMERO DE DIAS ENTRE SEMEADURA E MATURAÇÃO
+# ---------------------------------------------------------
+
+dias_ciclo_soja <- 
+  data_maturacao - data_semeadura_soja
+
+
+dias_ciclo_soja
+```
+```{r}
+# ---------------------------------------------------------
+# 3.7 - MOSTRAR A LINHA EM QUE A CONSTANTE FOI ATINGIDA
+# ---------------------------------------------------------
+
+dados_soja[
+  dados_soja$GDA_retroativo >= CT_soja,
+][1, ]
+```
+
+
+
+
+
+
+

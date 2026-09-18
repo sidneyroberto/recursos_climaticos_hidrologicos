@@ -1,0 +1,486 @@
+---
+title: "Aula 05 - Temperatura"
+output: html_document
+---
+```{r}
+# Importar os dados da estação meteorológica automática
+# do INMET de Aquidauana - MS.
+# Os arquivos possuem 8 linhas iniciais com os metadados
+# da estação. O argumento skip = 8 faz com que essas
+# linhas sejam ignoradas durante a importação.
+# O argumento fileEncoding = "Latin1" define a codificação
+# utilizada pelo arquivo e permite que o R interprete
+# corretamente caracteres especiais, como acentos e °.
+
+dados_2024 <- read.csv2(
+  "INMET_CO_MS_A719_AQUIDAUANA_01-01-2024_A_31-12-2024.CSV",
+  skip = 8,
+  fileEncoding = "Latin1"
+)
+dados_2025 <- read.csv2(
+  "INMET_CO_MS_A719_AQUIDAUANA_01-01-2025_A_31-12-2025.CSV",
+  skip = 8,
+  fileEncoding = "Latin1"
+)
+```
+```{r}
+#=========================================================
+# ETAPA 2 -
+# INSPEÇÃO INICIAL DOS DADOS
+#=========================================================
+# Verificar o número de linhas e colunas dos data frames.
+# Como os dados são horários, esperamos uma observação
+# para cada hora do ano.
+# 2025 é um ano não bissexto:
+# 365 dias x 24 horas = 8760 linhas esperadas.
+# Os arquivos do INMET possuem 19 variáveis, portanto,
+# esperamos 19 colunas em cada data frame.
+# O comando dim() retorna primeiro o número de linhas
+# e depois o número de colunas.
+
+dim(dados_2024)
+dim(dados_2025)
+# Verificar a estrutura dos data frames
+str(dados_2024)
+str(dados_2025)
+```
+```{r}
+#=========================================================
+# ETAPA 3 -
+# REMOÇÃO DE COLUNAS VAZIAS
+#=========================================================
+# Durante a importação, foi criada uma coluna adicional
+# denominada X, contendo apenas valores ausentes (NA).
+# Essa coluna ocorre porque as linhas do arquivo CSV do
+# INMET terminam com um separador ";" adicional.
+# Primeiro, verificar se todos os valores da coluna X
+# são realmente NA.
+#is.na() verifica, elemento por elemento, se o valor é ausente;
+#all() verifica se todos os resultados são TRUE.
+
+all(is.na(dados_2024$X))
+all(is.na(dados_2025$X))
+# Remover a coluna X dos dois data frames
+dados_2024$X <- NULL
+dados_2025$X <- NULL
+# Verificar novamente as dimensões dos data frames
+dim(dados_2024)
+dim(dados_2025)
+```
+```{r}
+#=========================================================
+# ETAPA 4 -
+# SELEÇÃO DAS VARIÁVEIS DE INTERESSE
+#=========================================================
+# Para esta aula, serão utilizadas apenas as variáveis:
+# - Data
+# - Hora UTC
+# - Temperatura do ar
+# - Temperatura máxima horária
+# - Temperatura mínima horária
+# Primeiro, verificar os nomes das colunas para identificar
+# exatamente como elas foram importadas pelo R.
+names(dados_2024)
+names(dados_2025)
+# Verificar se os nomes das colunas são iguais
+identical(
+  names(dados_2024),
+  names(dados_2025)
+)
+# Selecionar apenas as variáveis de interesse
+dados_2024_temp <- dados_2024[, c(
+  "Data",
+  "Hora.UTC",
+  "TEMPERATURA.DO.AR...BULBO.SECO..HORARIA...C.",
+  "TEMPERATURA.MÁXIMA.NA.HORA.ANT...AUT....C.",
+  "TEMPERATURA.MÍNIMA.NA.HORA.ANT...AUT....C."
+)]
+
+dados_2025_temp <- dados_2025[, c(
+  "Data",
+  "Hora.UTC",
+  "TEMPERATURA.DO.AR...BULBO.SECO..HORARIA...C.",
+  "TEMPERATURA.MÁXIMA.NA.HORA.ANT...AUT....C.",
+  "TEMPERATURA.MÍNIMA.NA.HORA.ANT...AUT....C."
+)]
+# Renomear as variáveis para facilitar as análises
+names(dados_2024_temp) <- c(
+  "data",
+  "hora_UTC",
+  "temperatura_C",
+  "temperatura_max_C",
+  "temperatura_min_C"
+)
+names(dados_2025_temp) <- c(
+  "data",
+  "hora_UTC",
+  "temperatura_C",
+  "temperatura_max_C",
+  "temperatura_min_C"
+)
+```
+```{r}
+#=========================================================
+# ETAPA 5 -
+# UNIÃO DOS DADOS DE 2024 E 2025
+#=========================================================
+# Como os dois data frames possuem as mesmas variáveis
+# e na mesma ordem, podemos unir suas linhas utilizando
+# a função rbind().
+# O resultado será um único data frame contendo os dados
+# horários de temperatura dos anos de 2024 e 2025.
+
+dados_temp <- rbind(
+  dados_2024_temp,
+  dados_2025_temp
+)
+# Verificar as dimensões do novo data frame
+dim(dados_temp)
+# Verificar a estrutura do novo data frame
+str(dados_temp)
+```
+```{r}
+#=========================================================
+# ETAPA 6 -
+# CRIAÇÃO DA VARIÁVEL DE DATA E HORA
+#=========================================================
+# Os dados do INMET apresentam a data e a hora em
+# colunas separadas.
+# Para trabalhar com séries temporais, é conveniente criar
+# uma única variável contendo data e hora.
+# Como a hora do arquivo está em UTC, será criada primeiro
+# uma variável data_hora_UTC.
+
+dados_temp$data_hora_UTC <- as.POSIXct(
+  paste(
+    dados_temp$data,
+    dados_temp$hora_UTC
+  ),
+  format = "%Y/%m/%d %H%M UTC",
+  tz = "UTC"
+)
+```
+
+```{r}
+#=========================================================
+# ETAPA 7 -
+# CONVERSÃO DO HORÁRIO UTC PARA O HORÁRIO LOCAL
+#=========================================================
+# Os dados do INMET são disponibilizados em horário UTC.
+# vamos converter a data e a hora para o horário local.
+# Aquidauana utiliza o mesmo fuso horário de Campo Grande.
+# O identificador "America/Campo_Grande" considera as regras
+# históricas oficiais do fuso horário.
+#analise os dados criados, o que voce observa em relação a coluna data_hora_local?
+
+dados_temp$data_hora_local <- as.POSIXct(
+  format(
+    dados_temp$data_hora_UTC,
+    tz = "America/Campo_Grande"
+  ),
+  tz = "America/Campo_Grande"
+)
+```
+
+```{r}
+#=========================================================
+# ETAPA 8 -
+# VERIFICAÇÃO DA CONTINUIDADE TEMPORAL
+#=========================================================
+# Criar a sequência horária completa esperada entre
+# o primeiro e o último registro da série.
+# Essa etapa verifica a continuidade das datas e horas. 
+# Ela ainda não verifica se existem valores NA nas variáveis de temperatura.
+#seq() cria a sequência horária que deveria existir;
+sequencia_horaria <- seq(
+  from = min(dados_temp$data_hora_UTC),
+  to = max(dados_temp$data_hora_UTC),
+  by = "hour"
+)
+# Verificar se existem horas ausentes na série.
+setdiff(
+  sequencia_horaria,
+  dados_temp$data_hora_UTC
+)
+# Verificar se existem datas e horas duplicadas.
+sum(
+  duplicated(dados_temp$data_hora_UTC)
+)
+```
+```{r}
+#=========================================================
+# ETAPA 9 -
+# VERIFICAÇÃO DE VALORES AUSENTES
+#=========================================================
+# Verificar quantos valores ausentes (NA) existem
+# em cada variável de temperatura.
+
+sum(is.na(dados_temp$temperatura_C))
+sum(is.na(dados_temp$temperatura_max_C))
+sum(is.na(dados_temp$temperatura_min_C))
+```
+```{r}
+#=========================================================
+# ETAPA 10 -
+# CRIAÇÃO DA DATA LOCAL
+#=========================================================
+# Criar a variável de data a partir da data e hora local.
+# É necessário informar o fuso horário para que a data
+# corresponda corretamente ao horário local de Aquidauana.
+dados_temp$data_local <- as.Date(
+  dados_temp$data_hora_local,
+  tz = "America/Campo_Grande"
+)
+```
+
+```{r}
+#=========================================================
+# ETAPA 11 -
+# CÁLCULO DAS TEMPERATURAS DIÁRIAS
+#=========================================================
+# A partir dos dados horários, serão calculadas:
+# - temperatura média diária;
+# - temperatura máxima diária;
+# - temperatura mínima diária.
+# Também será contabilizado o número de observações
+# horárias disponíveis em cada dia.
+# A função aggregate() permite agrupar os dados de acordo
+# com uma variável e aplicar uma função a cada grupo.
+# Temperatura média diária
+# Neste exercício, a temperatura média diária será calculada
+# pela média aritmética das observações horárias da estação
+# meteorológica automática.
+# temperatura_C ~ data_local
+# significa: calcular a variável temperatura_C agrupando os dados
+# de acordo com cada valor de data_local.
+# data = dados_temp
+# informa em qual data frame estão as variáveis.
+# FUN = mean
+# determina que será calculada a média dos valores.
+# na.rm = TRUE
+# faz com que valores ausentes (NA) sejam ignorados
+# durante o cálculo da média.
+temp_media_diaria <- aggregate(
+  temperatura_C ~ data_local,
+  data = dados_temp,
+  FUN = mean,
+  na.rm = TRUE
+)
+
+# Temperatura máxima diária
+temp_max_diaria <- aggregate(
+  temperatura_max_C ~ data_local,
+  data = dados_temp,
+  FUN = max,
+  na.rm = TRUE
+)
+
+# Temperatura mínima diária
+temp_min_diaria <- aggregate(
+  temperatura_min_C ~ data_local,
+  data = dados_temp,
+  FUN = min,
+  na.rm = TRUE
+)
+# Número de observações horárias em cada dia
+#atenção especial para o primeiro e ultimo dia
+n_observacoes <- aggregate(
+  data_hora_local ~ data_local,
+  data = dados_temp,
+  FUN = length
+)
+
+#=========================================================
+# UNIÃO DOS RESULTADOS
+#=========================================================
+# Unir os resultados em um único data frame (merge),
+# o merge combina 2 data frames por vez
+temperatura_diaria <- merge(
+  temp_media_diaria,
+  temp_max_diaria,
+  by = "data_local"
+)
+temperatura_diaria <- merge(
+  temperatura_diaria,
+  temp_min_diaria,
+  by = "data_local"
+)
+```
+
+```{r}
+#=========================================================
+# ETAPA 12 -
+# CÁLCULO DA AMPLITUDE TÉRMICA DIÁRIA
+#=========================================================
+# A amplitude térmica diária corresponde à diferença
+# entre a temperatura máxima e a temperatura mínima
+# registradas no dia.
+
+temperatura_diaria$amplitude_termica_C <-
+  temperatura_diaria$temperatura_max_C -
+  temperatura_diaria$temperatura_min_C
+```
+
+```{r}
+#=========================================================
+# ETAPA 13 -
+# VISUALIZAÇÃO DAS TEMPERATURAS DIÁRIAS
+#=========================================================
+# Carregar o pacote ggplot2
+library(ggplot2)
+
+# Construir um gráfico com as temperaturas mínima,
+# média e máxima diárias ao longo do período.
+
+ggplot(
+  data = temperatura_diaria,
+  aes(x = data_local)
+) +
+  geom_line(
+    aes(y = temperatura_min_C, color = "Temperatura mínima"),
+    linewidth = 0.5
+  ) +
+  geom_line(
+    aes(y = temperatura_C, color = "Temperatura média"),
+    linewidth = 0.5
+  ) +
+  geom_line(
+    aes(y = temperatura_max_C, color = "Temperatura máxima"),
+    linewidth = 0.5
+  ) +
+  labs(
+    x = "Data",
+    y = "Temperatura (°C)",
+    color = "Variável",
+    title = "Temperaturas diárias em Aquidauana - MS"
+  ) +
+  theme_bw()
+```
+```{r}
+# Calculando as temperaturas mensais
+
+## a) Cálculo das temperaturas mensais
+
+### Criar a coluna mês
+dados_temp$mes <- substr(dados_temp$data, 6, 7)
+dados_temp$ano <- substr(dados_temp$data, 1, 4)
+
+## Pegar dados de 2024
+dados_temp_2024 <- dados_temp[dados_temp$ano == 2024, ]
+
+## Pegar dados de 2025
+dados_temp_2025 <- dados_temp[dados_temp$ano == 2025, ]
+
+## Agregar as temperaturas por mês
+temp_media_mensal <- aggregate(
+  temperatura_C ~ ano + mes,
+  data = dados_temp,
+  FUN = mean,
+  na.rm = TRUE
+)
+
+temp_max_mensal <- aggregate(
+  temperatura_max_C ~ ano + mes,
+  data = dados_temp,
+  FUN = mean,
+  na.rm = TRUE
+)
+
+temp_min_mensal <- aggregate(
+  temperatura_min_C ~ ano + mes,
+  data = dados_temp,
+  FUN = mean,
+  na.rm = TRUE
+)
+
+temperatura_mensal <- merge(
+  temp_media_mensal,
+  temp_max_mensal,
+  by = c("ano", "mes")
+)
+temperatura_mensal <- merge(
+  temperatura_mensal,
+  temp_min_mensal,
+  by = c("ano", "mes")
+)
+```
+
+```{r}
+# Geração dos gráficos
+
+## Gráfico de temperatura média
+
+ggplot(
+  temperatura_mensal,
+  aes(
+    x = mes,
+    y = temperatura_C,
+    group = ano,
+    color = ano
+  )
+) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Temperatura média mensal",
+    x = "Mês",
+    y = "Temperatura média (°C)",
+    color = "Ano"
+  ) +
+  theme_bw()
+
+## Gráfico de temperatura máxima
+ggplot(
+  temperatura_mensal,
+  aes(
+    x = mes,
+    y = temperatura_max_C,
+    group = ano,
+    color = ano
+  )
+) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Temperatura máxima mensal",
+    x = "Mês",
+    y = "Temperatura máxima (°C)",
+    color = "Ano"
+  ) +
+  theme_bw()
+
+## Gráfico de temperatura mínima
+ggplot(
+  temperatura_mensal,
+  aes(
+    x = mes,
+    y = temperatura_min_C,
+    group = ano,
+    color = ano
+  )
+) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Temperatura mínima mensal",
+    x = "Mês",
+    y = "Temperatura mínima (°C)",
+    color = "Ano"
+  ) +
+  theme_bw()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

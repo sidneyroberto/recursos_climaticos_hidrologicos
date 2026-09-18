@@ -297,6 +297,8 @@ temperatura_mensal$omega_s <- acos(
   -tan(latitude_rad) *
     tan(temperatura_mensal$declinacao_rad)
 )
+
+temperatura_mensal$omega_s
 ```
 
 ```{r}
@@ -308,6 +310,8 @@ temperatura_mensal$omega_s <- acos(
 temperatura_mensal$fotoperiodo_h <- (
   24 / pi
 ) * temperatura_mensal$omega_s
+
+temperatura_mensal$fotoperiodo_h
 ```
 
 ```{r}
@@ -323,9 +327,7 @@ primeiro_dia <- as.Date(
     sep = "-"
   )
 )
-```
 
-```{r}
 # Criar a data correspondente ao primeiro dia
 # do mês seguinte.
 primeiro_dia_seguinte <- as.Date(

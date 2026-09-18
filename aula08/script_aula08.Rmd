@@ -432,8 +432,9 @@ head(
 temperatura_HS$dr <- 1 + 0.033 * cos(
   (2 * pi / 365) * temperatura_HS$NDA
 )
-```
 
+head(temperatura_HS$dr)
+```
 ```{r}
 #=========================================================
 # 26. CALCULAR A DECLINAÇÃO SOLAR
@@ -443,8 +444,9 @@ temperatura_HS$declinacao_rad <- 0.409 * sin(
     temperatura_HS$NDA -
     1.39
 )
-```
 
+head(temperatura_HS$declinacao_rad)
+```
 ```{r}
 #=========================================================
 # 27. CALCULAR O ÂNGULO HORÁRIO DO PÔR DO SOL
@@ -453,8 +455,9 @@ temperatura_HS$omega_s <- acos(
   -tan(latitude_rad) *
     tan(temperatura_HS$declinacao_rad)
 )
-```
 
+head(temperatura_HS$omega_s)
+```
 ```{r}
 #=========================================================
 # 28. CALCULAR A RADIAÇÃO EXTRATERRESTRE (Ra)

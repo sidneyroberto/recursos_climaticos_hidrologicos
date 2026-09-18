@@ -519,6 +519,8 @@ temperatura_HS$ETo_HS <- (
     (temperatura_HS$Tmax - temperatura_HS$Tmin)^0.5 *
     (17.8 + temperatura_HS$Tmed)
 )
+
+head(temperatura_HS$ETo_HS)
 ```
 
 ```{r}
@@ -535,6 +537,8 @@ temperatura_HS$ano <- as.numeric(
 temperatura_HS$mes <- as.numeric(
   format(temperatura_HS$data_local, "%m")
 )
+
+head(temperatura_HS)
 ```
 
 ```{r}
@@ -649,8 +653,10 @@ names(URmax)[
 names(URmin)[
   names(URmin) == "URmin_horaria"
 ] <- "URmin"
-```
 
+URmax
+URmin
+```
 ```{r}
 #=========================================================
 # 36. CALCULAR A VELOCIDADE MÉDIA DIÁRIA DO VENTO
@@ -720,8 +726,9 @@ dados_FAO <- merge(
   vento_diario,
   by = "data_local"
 )
-```
 
+head(dados_FAO)
+```
 ```{r}
 #=========================================================
 # 38. CALCULAR A PRESSÃO DE SATURAÇÃO DE VAPOR
@@ -743,6 +750,8 @@ dados_FAO$es_Tmin <- 0.6108 * exp(
   (17.27 * dados_FAO$Tmin) /
     (dados_FAO$Tmin + 237.3)
 )
+
+head(dados_FAO[, c("es_Tmax", "es_Tmin")])
 ```
 
 ```{r}
@@ -757,8 +766,9 @@ dados_FAO$es <- (
   dados_FAO$es_Tmax +
     dados_FAO$es_Tmin
 ) / 2
-```
 
+head(dados_FAO$es)
+```
 ```{r}
 #=========================================================
 # 40. CALCULAR A PRESSÃO REAL DE VAPOR (ea)
@@ -773,8 +783,9 @@ dados_FAO$ea <- (
     dados_FAO$es_Tmax *
     (dados_FAO$URmin / 100)
 ) / 2
-```
 
+head(dados_FAO$ea)
+```
 ```{r}
 #=========================================================
 # 41. CALCULAR O DÉFICIT DE PRESSÃO DE VAPOR
@@ -786,8 +797,9 @@ dados_FAO$DPV <- (
   dados_FAO$es -
     dados_FAO$ea
 )
-```
 
+head(dados_FAO$DPV)
+```
 ```{r}
 #=========================================================
 # 42. CALCULAR A DECLIVIDADE DA CURVA DE PRESSÃO
@@ -809,8 +821,9 @@ dados_FAO$Delta <- (
 ) / (
   dados_FAO$Tmed + 237.3
 )^2
-```
 
+head(dados_FAO[, c("es_Tmed", "Delta")])
+```
 ```{r}
 #=========================================================
 # 43. CALCULAR A PRESSÃO ATMOSFÉRICA
@@ -857,8 +870,9 @@ z <- 10
 dados_FAO$u2 <- dados_FAO$uz * (
   4.87 / log(67.8 * z - 5.42)
 )
-```
 
+head(dados_FAO$u2)
+```
 ```{r}
 #=========================================================
 # 46. CALCULAR A RADIAÇÃO SOLAR EM CÉU CLARO (Rso)
@@ -874,8 +888,9 @@ dados_FAO$Rso <- (
   (0.75 + 2e-5 * altitude) *
     dados_FAO$Ra
 )
-```
 
+head(dados_FAO$Rso)
+```
 ```{r}
 #=========================================================
 # 47. CALCULAR A RADIAÇÃO LÍQUIDA DE ONDAS CURTAS (Rns)
@@ -892,8 +907,9 @@ dados_FAO$Rns <- (
   (1 - albedo) *
     dados_FAO$Rs
 )
-```
 
+head(dados_FAO$Rns)
+```
 ```{r}
 #=========================================================
 # 48. CONVERTER AS TEMPERATURAS PARA KELVIN
@@ -905,8 +921,9 @@ dados_FAO$Rns <- (
 dados_FAO$Tmax_K <- dados_FAO$Tmax + 273.16
 
 dados_FAO$Tmin_K <- dados_FAO$Tmin + 273.16
-```
 
+head(dados_FAO[, c("Tmax_K", "Tmin_K")])
+```
 ```{r}
 #=========================================================
 # 49. CALCULAR A RADIAÇÃO LÍQUIDA DE ONDAS LONGAS (Rnl)
@@ -927,8 +944,9 @@ dados_FAO$Rnl <- (
         0.35
     )
 )
-```
 
+head(dados_FAO$Rnl)
+```
 ```{r}
 #=========================================================
 # 50. CALCULAR O SALDO DE RADIAÇÃO (Rn)
@@ -942,8 +960,9 @@ dados_FAO$Rn <- (
   dados_FAO$Rns -
     dados_FAO$Rnl
 )
-```
 
+head(dados_FAO$Rn)
+```
 ```{r}
 #=========================================================
 # 51. CALCULAR A ETo PELO MÉTODO DE
@@ -973,8 +992,9 @@ dados_FAO$ETo_PM <- (
     gama *
     (1 + 0.34 * dados_FAO$u2)
 )
-```
 
+head(dados_FAO$ETo_PM)
+```
 ```{r}
 #=========================================================
 # 52. VERIFICAR OS RESULTADOS DA ETo DIÁRIA
@@ -985,22 +1005,9 @@ dados_FAO$ETo_PM <- (
 summary(dados_FAO$ETo_PM)
 
 # Verificar a existência de valores ausentes (NA).
-
 sum(is.na(dados_FAO$ETo_PM))
 
-# Verificar os valores mínimo e máximo.
-
-min(
-  dados_FAO$ETo_PM,
-  na.rm = TRUE
-)
-
-max(
-  dados_FAO$ETo_PM,
-  na.rm = TRUE
-)
 # Verificar se existem valores negativos de ETo.
-
 sum(
   dados_FAO$ETo_PM < 0,
   na.rm = TRUE

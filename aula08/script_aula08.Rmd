@@ -1,6 +1,8 @@
 ---
 title: "script_aula08"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 ```{r}
 #=========================================================
@@ -1046,6 +1048,146 @@ ETo_PM_mensal <- aggregate(
 
 # Conferir.
 ETo_PM_mensal
+```
+```{r}
+#=========================================================
+# ATIVIDADE 8 - ITEM A
+# COMPARAÇÃO MENSAL DOS MÉTODOS
+#=========================================================
+
+# Reunir os resultados dos três métodos
+comparacao_mensal <- merge(
+  temperatura_mensal[
+    , c("ano", "mes", "ETP_Thornthwaite")
+  ],
+  ETo_HS_mensal,
+  by = c("ano", "mes")
+)
+
+comparacao_mensal <- merge(
+  comparacao_mensal,
+  ETo_PM_mensal,
+  by = c("ano", "mes")
+)
+
+# Renomear as colunas
+names(comparacao_mensal) <- c(
+  "ano",
+  "mes",
+  "Thornthwaite",
+  "Hargreaves_Samani",
+  "Penman_Monteith"
+)
+
+# Ordenar por mês
+comparacao_mensal <- comparacao_mensal[
+  order(comparacao_mensal$mes),
+]
+
+# Arredondar os valores
+comparacao_mensal$Thornthwaite <- round(
+  comparacao_mensal$Thornthwaite, 2
+)
+
+comparacao_mensal$Hargreaves_Samani <- round(
+  comparacao_mensal$Hargreaves_Samani, 2
+)
+
+comparacao_mensal$Penman_Monteith <- round(
+  comparacao_mensal$Penman_Monteith, 2
+)
+
+# Visualizar
+comparacao_mensal
+```
+```{r}
+#=========================================================
+# ATIVIDADE 8 - ITEM B
+# TOTAL ANUAL DE EVAPOTRANSPIRAÇÃO
+#=========================================================
+
+total_anual <- data.frame(
+  Metodo = c(
+    "Thornthwaite",
+    "Hargreaves-Samani",
+    "Penman-Monteith FAO-56"
+  ),
+  
+  Total_mm_ano = c(
+    sum(comparacao_mensal$Thornthwaite),
+    sum(comparacao_mensal$Hargreaves_Samani),
+    sum(comparacao_mensal$Penman_Monteith)
+  )
+)
+
+# Arredondar
+total_anual$Total_mm_ano <- round(
+  total_anual$Total_mm_ano,
+  2
+)
+
+total_anual
+```
+```{r}
+#=========================================================
+# ATIVIDADE 8 - ITEM C
+# GRÁFICO COMPARATIVO
+#=========================================================
+
+# Instalar o pacote caso ainda não esteja instalado
+# install.packages("ggplot2")
+
+library(ggplot2)
+
+# Transformar a tabela para formato longo
+dados_grafico <- data.frame(
+  mes = rep(comparacao_mensal$mes, 3),
+  
+  Metodo = rep(
+    c(
+      "Thornthwaite",
+      "Hargreaves-Samani",
+      "Penman-Monteith FAO-56"
+    ),
+    each = nrow(comparacao_mensal)
+  ),
+  
+  ETP_ETo = c(
+    comparacao_mensal$Thornthwaite,
+    comparacao_mensal$Hargreaves_Samani,
+    comparacao_mensal$Penman_Monteith
+  )
+)
+
+# Gráfico
+ggplot(
+  dados_grafico,
+  aes(
+    x = mes,
+    y = ETP_ETo,
+    group = Metodo,
+    color = Metodo
+  )
+) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  scale_x_continuous(
+    breaks = 1:12
+  ) +
+  labs(
+    title = "Evapotranspiração mensal em Aquidauana-MS - 2024",
+    x = "Mês",
+    y = "Evapotranspiração (mm/mês)",
+    color = "Método"
+  ) +
+  scale_color_manual(
+    values = c(
+      "Thornthwaite" = "blue",
+      "Hargreaves-Samani" = "red",
+      "Penman-Monteith FAO-56" = "orange"
+    )
+  )
+  theme_minimal()
 ```
 
 

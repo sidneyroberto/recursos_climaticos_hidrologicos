@@ -1,5 +1,265 @@
 ---
 title: "atividade_aula11"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
+```{r}
+# Importando os dados
+
+library(readxl)
+
+dados <- read_excel("dados_aula_campo.xlsx", skip = 2)
+dados
+```
+```{r}
+# Verificando a estrutura do arquivo
+
+str(dados)
+```
+```{r}
+# Verificando dados ausentes
+
+all(is.na(dados))
+```
+```{r}
+# Selecionando as variáveis de interesse
+
+dados_campo <- dados[, c("Timestamp", "°C Air Temperature", "mm Precipitation")]
+
+# Renomeando as variáveis
+names(dados_campo) <- c("horario", "temperatura_ar", "precipitacao")
+
+# Exibindo a estrutura do novo dataframe
+str(dados_campo)
+```
+```{r}
+# Selecionando o período de interesse
+
+data1 <- "2026-01-01 00:00:00"
+data2 <- "2026-09-25 00:00:00"
+
+dados_periodo_interesse <- dados_campo[
+  dados_campo$horario >= as.POSIXct(data1)
+  & dados_campo$horario <= as.POSIXct(data2),
+]
+
+# Vendo se o corte foi feito corretamente
+head(dados_periodo_interesse)
+tail(dados_periodo_interesse) 
+```
+```{r}
+# Calculando as temperaturas médais, mínimas e máximas diárias
+
+library(dplyr)
+
+temperaturas_medias_diarias <- dados_periodo_interesse %>%
+  mutate(data = as.Date(horario)) %>%
+  group_by(data) %>%
+  summarise(
+    temperatura_media = mean(temperatura_ar, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+temperaturas_minimas_diarias <- dados_periodo_interesse %>%
+  mutate(data = as.Date(horario)) %>%
+  group_by(data) %>%
+  summarise(
+    temperatura_minima = min(temperatura_ar, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+temperaturas_maximas_diarias <- dados_periodo_interesse %>%
+  mutate(data = as.Date(horario)) %>%
+  group_by(data) %>%
+  summarise(
+    temperatura_maxima = max(temperatura_ar, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+temperaturas_medias_diarias
+temperaturas_minimas_diarias
+temperaturas_maximas_diarias
+```
+```{r}
+# Calculando as estatísticas de temperatura mensais
+
+library(lubridate)
+
+temperaturas_mensais <- temperaturas_medias_diarias %>%
+  left_join(temperaturas_maximas_diarias, by = "data") %>%
+  left_join(temperaturas_minimas_diarias, by = "data") %>%
+  mutate(
+    ano = year(data),
+    mes = month(data)
+  ) %>%
+  group_by(ano, mes) %>%
+  summarise(
+    temperatura_media_mensal =
+      mean(temperatura_media, na.rm = TRUE),
+
+    media_temperaturas_maximas_diarias =
+      mean(temperatura_maxima, na.rm = TRUE),
+
+    media_temperaturas_minimas_diarias =
+      mean(temperatura_minima, na.rm = TRUE),
+
+    .groups = "drop"
+  )
+
+knitr::kable(
+  temperaturas_mensais,
+  digits = 2,
+  col.names = c(
+    "Ano",
+    "Mês",
+    "Temperatura média (°C)",
+    "Média das máximas diárias (°C)",
+    "Média das mínimas diárias (°C)"
+  )
+)
+```
+```{r}
+# Calculando a precipitação acumulada por dia
+
+precipitacao_acumulada_diaria <- dados_periodo_interesse %>%
+  mutate(data = as.Date(horario)) %>%
+  group_by(data) %>%
+  summarise(
+    precipitacao_diaria = sum(precipitacao, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+precipitacao_acumulada_diaria
+```
+```{r}
+# Calculando a precipitação acumulada mensal
+
+precipitacoes_mensais <- precipitacao_acumulada_diaria %>%
+  mutate(
+    ano = year(data),
+    mes = month(data)
+  ) %>%
+  group_by(ano, mes) %>%
+  summarise(
+    precipitacao_mensal =
+      sum(precipitacao_diaria, na.rm = TRUE),
+
+    .groups = "drop"
+  )
+
+knitr::kable(
+  precipitacoes_mensais,
+  digits = 2,
+  col.names = c(
+    "Ano",
+    "Mês",
+    "Precipitação mensal (mm)"
+  )
+)
+```
+```{r}
+# Calculando a precipitação total acumulada do período
+
+sum(precipitacoes_mensais$precipitacao_mensal)
+```
+```{r}
+# Criando o gráfico de temperatura
+
+library(ggplot2)
+library(tidyr)
+
+temperaturas_mensais %>%
+  pivot_longer(
+    cols = c(
+      temperatura_media_mensal,
+      media_temperaturas_maximas_diarias,
+      media_temperaturas_minimas_diarias
+    ),
+    names_to = "tipo_temperatura",
+    values_to = "temperatura"
+  ) %>%
+  mutate(
+    mes = factor(
+      mes,
+      levels = 1:12,
+      labels = c(
+        "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+        "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+      )
+    )
+  ) %>%
+  ggplot(
+    aes(
+      x = mes,
+      y = temperatura,
+      color = tipo_temperatura,
+      group = interaction(tipo_temperatura, ano)
+    )
+  ) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  scale_color_manual(
+    name = "Variável",
+    values = c(
+      temperatura_media_mensal = "blue",
+      media_temperaturas_maximas_diarias = "red",
+      media_temperaturas_minimas_diarias = "darkgreen"
+    ),
+    labels = c(
+      temperatura_media_mensal = "Temperatura média mensal",
+      media_temperaturas_maximas_diarias = "Média das máximas diárias",
+      media_temperaturas_minimas_diarias = "Média das mínimas diárias"
+    )
+  ) +
+  labs(
+    title = "Variação mensal da temperatura",
+    x = "Mês",
+    y = "Temperatura (°C)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold"
+    ),
+    legend.position = "bottom"
+  )
+```
+```{r}
+# Criando o gráfico de precipitações
+
+precipitacoes_mensais %>%
+  mutate(
+    mes = factor(
+      mes,
+      levels = 1:9,
+      labels = c(
+        "Jan", "Fev", "Mar", "Abr", "Mai",
+        "Jun", "Jul", "Ago", "Set"
+      )
+    )
+  ) %>%
+  ggplot(aes(x = mes, y = precipitacao_mensal)) +
+  geom_col(fill = "steelblue", width = 0.7) +
+  labs(
+    title = "Precipitação acumulada mensal — 2026",
+    x = "Mês",
+    y = "Precipitação acumulada (mm)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold"
+    )
+  )
+```
+
+
+
+
+
+
+
 

@@ -1,0 +1,490 @@
+---
+title: "Atividade aula 10"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+#=========================================================
+# 1. IMPORTAÇÃO DOS DADOS
+#=========================================================
+
+library(readxl)
+
+# Precipitação acumulada mensal (mm)
+precipitacao <- read_excel(
+  "30-Precipitação-Acumulada-NCB_1981-2010.xls",
+  skip = 3
+)
+
+# Evapotranspiração potencial mensal (mm)
+etp <- read_excel(
+  "49-Evapotranspiração-Potencial-NCB_1981-2010.xls",
+  skip = 3
+)
+
+# Conferir os nomes das colunas
+names(precipitacao)
+names(etp)
+
+# Visualizar os dados
+head(precipitacao)
+head(etp)
+```
+```{r}
+#=========================================================
+# 2. SELEÇÃO DA ESTAÇÃO DE DOURADOS - MS
+#=========================================================
+# O grepl() procura o texto "DOURADOS" e retorna 
+# TRUE nas linhas correspondentes. 
+# O argumento ignore.case = TRUE permite encontrar o nome 
+# independentemente de letras maiúsculas ou minúsculas.
+
+#Selecionar Campo Grande na planilha de precipitação
+precipitacao_DOURADOS <- precipitacao[
+  grepl("DOURADOS", precipitacao$`Nome da Estação`,
+        ignore.case = TRUE),
+]
+
+# Selecionar Campo Grande na planilha de ETP
+etp_DR <- etp[
+  grepl("DOURADOS", etp$`Nome da Estação`,
+        ignore.case = TRUE),
+]
+
+# Conferir os resultados
+precipitacao_DOURADOS 
+etp_DR
+```
+```{r}
+# 3. ORGANIZAÇÃO DOS DADOS MENSAIS
+#=========================================================
+# Criar um vetor com os meses do ano
+meses <- c(
+  "Janeiro", "Fevereiro", "Março", "Abril",
+  "Maio", "Junho", "Julho", "Agosto",
+  "Setembro", "Outubro", "Novembro", "Dezembro"
+)
+
+# Criar o data frame com os valores mensais de P e ETP
+# Seleciona a primeira linha (1) e 
+# as colunas 4 a 15 correspondem aos meses de janeiro a dezembro
+balanco <- data.frame(
+  mes = meses,
+  P = as.numeric(precipitacao_DOURADOS[1, 4:15]),
+  ETP = as.numeric(etp_DR[1, 4:15])
+)
+
+balanco
+```
+```{r}
+#=========================================================
+# 4. DIFERENÇA ENTRE PRECIPITAÇÃO E ETP
+#=========================================================
+# Calcular a diferença mensal entre P e ETP
+balanco$P_ETP <- balanco$P - balanco$ETP
+
+balanco
+```
+```{r}
+#=========================================================
+# 5. CAPACIDADE DE ÁGUA DISPONÍVEL (CAD)
+#=========================================================
+
+# A CAD representa a quantidade máxima de água que o solo
+# pode armazenar e disponibilizar às plantas, considerando
+# a profundidade do solo explorada pelas raízes.
+# Para esta atividade, adotaremos CAD = 100 mm.
+CAD <- 100
+CAD
+```
+```{r}
+#=========================================================
+# 6. NEGATIVO ACUMULADO E ARMAZENAMENTO
+#=========================================================
+
+# Criar as colunas de negativo acumulado (NEG.ACUM)
+# e armazenamento de água no solo (ARM).
+
+balanco$NEG_ACUM <- NA_real_
+balanco$ARM <- NA_real_
+balanco
+
+#---------------------------------------------------------
+# 6.1. DEFINIR UMA CONDIÇÃO INICIAL
+#---------------------------------------------------------
+# Para iniciar o cálculo, consideramos inicialmente
+# o solo com armazenamento igual à CAD.
+# Como estamos trabalhando com um Balanço Hídrico Climatológico Normal, 
+# janeiro não é realmente o "começo" hidrológico do sistema.
+# O que acontece em janeiro depende da quantidade de água 
+# que permaneceu armazenada em dezembro.
+# apenas para dar ao R um ponto de partida para a primeira tentativa.
+
+ARM_anterior <- CAD
+
+# Como o balanço hídrico climatológico representa um ciclo
+# anual contínuo, o armazenamento no início e no final
+# do ciclo deve ser compatível.
+#
+# Por isso, o cálculo dos 12 meses será repetido até que
+# o armazenamento se estabilize.
+
+# Definir o número máximo de repetições
+max_iter <- 1000
+
+# Definir a diferença máxima aceita entre dois ciclos
+tolerancia <- 0.001
+
+#---------------------------------------------------------
+# 6.2. CALCULAR O BALANÇO MÊS A MÊS
+#---------------------------------------------------------
+
+for (iteracao in 1:max_iter) {
+  
+  # Guardar o ARM de dezembro do ciclo anterior
+  ARM_inicio <- ARM_anterior
+  
+  # Percorrer os 12 meses do ano
+  for (i in 1:12) {
+    
+    #-----------------------------------------------------
+    # SITUAÇÃO 1: P - ETP NEGATIVO
+    #-----------------------------------------------------
+    
+    if (balanco$P_ETP[i] < 0) {
+      
+      # Quando P - ETP é negativo, ocorre retirada
+      # de água do armazenamento do solo.
+      #
+      # Primeiro, calcular o NEG.ACUM correspondente
+      # ao armazenamento do mês anterior.
+      
+      NEG_anterior <- CAD * log(ARM_anterior / CAD)
+      
+      # Somar o déficit do mês atual
+      balanco$NEG_ACUM[i] <- (
+        NEG_anterior + balanco$P_ETP[i]
+      )
+      
+      # Calcular o novo armazenamento
+      balanco$ARM[i] <- CAD * exp(
+        balanco$NEG_ACUM[i] / CAD
+      )
+      
+      
+      #-----------------------------------------------------
+      # SITUAÇÃO 2: P - ETP POSITIVO OU IGUAL A ZERO
+      #-----------------------------------------------------
+      
+    } else {
+      
+      # Quando P - ETP é positivo, ocorre reposição
+      # de água no solo.
+      #
+      # O armazenamento aumenta, mas nunca pode
+      # ultrapassar a CAD.
+      
+      balanco$ARM[i] <- min(
+        CAD,
+        ARM_anterior + balanco$P_ETP[i]
+      )
+      
+      # Calcular o NEG.ACUM correspondente ao novo ARM.
+      #
+      # Quando ARM = CAD:
+      # log(1) = 0
+      # portanto, NEG.ACUM = 0.
+      
+      balanco$NEG_ACUM[i] <- CAD * log(
+        balanco$ARM[i] / CAD
+      )
+    }
+    
+    # O ARM calculado no mês atual passa a ser
+    # o ARM anterior utilizado no próximo mês.
+    
+    ARM_anterior <- balanco$ARM[i]
+  }
+  
+  
+  #-------------------------------------------------------
+  # 7.3. VERIFICAR SE O CICLO SE ESTABILIZOU
+  #-------------------------------------------------------
+  
+  # Comparar o ARM de dezembro obtido neste ciclo
+  # com o utilizado no início do ciclo.
+  #
+  # Quando a diferença for muito pequena, consideramos
+  # que o balanço climatológico atingiu o equilíbrio.
+  
+  if (abs(ARM_anterior - ARM_inicio) < tolerancia) {
+    break
+  }
+}
+
+#---------------------------------------------------------
+# 6.4. VERIFICAR SE O CÁLCULO CONVERGIU
+#---------------------------------------------------------
+
+# Se o número máximo de repetições for atingido
+# e a diferença entre os ciclos ainda for maior
+# que a tolerância estabelecida, será emitido um aviso.
+
+if (iteracao == max_iter &&
+    abs(ARM_anterior - ARM_inicio) >= tolerancia) {
+  
+  warning(
+    "O balanço não atingiu a convergência."
+  )
+}
+
+#---------------------------------------------------------
+# 6.5. CONFERIR OS RESULTADOS
+#---------------------------------------------------------
+balanco[, c(
+  "mes",
+  "P_ETP",
+  "NEG_ACUM",
+  "ARM"
+)]
+```
+```{r}
+#=========================================================
+# 7. ALTERAÇÃO DO ARMAZENAMENTO (ALT)
+#=========================================================
+# Organizar os valores do ARM do mês anterior.
+# Como o balanço é cíclico, janeiro utiliza o ARM de dezembro.
+# Os demais meses utilizam o ARM do mês imediatamente anterior.
+
+balanco$ARM_anterior <- c(
+  balanco$ARM[12],
+  balanco$ARM[1:11]
+)
+
+# Calcular a alteração do armazenamento:
+# ALT = ARM atual - ARM anterior
+
+balanco$ALT <- balanco$ARM - balanco$ARM_anterior
+balanco
+```
+```{r}
+#=========================================================
+# 8. EVAPOTRANSPIRAÇÃO REAL (ETR)
+#=========================================================
+
+# A ETR representa a quantidade de água efetivamente
+# evapotranspirada, considerando a precipitação e a água
+# disponível no armazenamento do solo.
+#
+# Quando P - ETP >= 0:
+# ETR = ETP
+#
+# Quando P - ETP < 0:
+# ETR = P + |ALT|
+#
+# Nesse segundo caso, a evapotranspiração utiliza a
+# precipitação e a água retirada do armazenamento do solo.
+
+
+#---------------------------------------------------------
+# 8.1. CRIAR A COLUNA ETR
+#---------------------------------------------------------
+
+balanco$ETR <- NA_real_
+
+
+#---------------------------------------------------------
+# 8.2. CALCULAR A ETR MENSAL
+#---------------------------------------------------------
+
+for (i in 1:12) {
+  
+  if (balanco$P_ETP[i] >= 0) {
+    
+    # Precipitação suficiente para atender à ETP
+    balanco$ETR[i] <- balanco$ETP[i]
+    
+  } else {
+    
+    # Precipitação + água retirada do solo
+    # abs transforma a alt negativa em valor positivo
+    balanco$ETR[i] <- (
+      balanco$P[i] + abs(balanco$ALT[i])
+    )
+  }
+}
+
+balanco
+```
+```{r}
+#=========================================================
+# 9. DEFICIÊNCIA HÍDRICA (DEF)
+#=========================================================
+
+# A deficiência hídrica representa a parcela da demanda
+# potencial de evapotranspiração que não foi atendida.
+#
+# DEF = ETP - ETR
+#
+# Quando ETR = ETP, não ocorre deficiência hídrica.
+# Quando ETR < ETP, a diferença representa a deficiência
+# de água no período.
+
+# Calcular a deficiência hídrica mensal
+balanco$DEF <- balanco$ETP - balanco$ETR
+balanco
+```
+```{r}
+#=========================================================
+# 10. EXCEDENTE HÍDRICO (EXC)
+#=========================================================
+
+# O excedente hídrico representa a água que sobra após
+# atender à evapotranspiração potencial e completar
+# o armazenamento de água no solo.
+#
+# Quando ARM < CAD:
+# EXC = 0
+#
+# Quando ARM = CAD:
+# EXC = (P - ETP) - ALT
+#
+# Portanto, o excedente só ocorre quando a água disponível
+# supera a quantidade necessária para completar o ARM.
+
+
+#---------------------------------------------------------
+# 10.1. CRIAR A COLUNA EXC
+#---------------------------------------------------------
+
+balanco$EXC <- NA_real_
+
+
+#---------------------------------------------------------
+# 10.2. CALCULAR O EXCEDENTE HÍDRICO
+#---------------------------------------------------------
+
+for (i in 1:12) {
+  
+  if (balanco$ARM[i] < CAD) {
+    
+    # O solo ainda não atingiu sua capacidade máxima.
+    # Portanto, não ocorre excedente hídrico.
+    
+    balanco$EXC[i] <- 0
+    
+  } else {
+    
+    # O solo atingiu a CAD.
+    # A água que sobra após a reposição constitui
+    # o excedente hídrico.
+    
+    balanco$EXC[i] <- (
+      balanco$P_ETP[i] - balanco$ALT[i]
+    )
+  }
+}
+
+balanco
+```
+```{r}
+#=========================================================
+# 11. ORGANIZAÇÃO DA TABELA FINAL
+#=========================================================
+# Selecionar as variáveis do balanço hídrico
+# na ordem utilizada durante os cálculos.
+
+balanco_final <- balanco[, c(
+  "mes",
+  "P",
+  "ETP",
+  "P_ETP",
+  "NEG_ACUM",
+  "ARM",
+  "ALT",
+  "ETR",
+  "DEF",
+  "EXC"
+)]
+
+balanco_final
+```
+```{r}
+#=========================================================
+# 12. TOTAIS ANUAIS DO BALANÇO HÍDRICO
+#=========================================================
+# Calcular os totais anuais das variáveis que
+# representam fluxos ou alterações de água.
+#
+# NEG.ACUM e ARM não são somados, pois representam
+# condições de armazenamento em cada mês.
+
+totais_anuais <- colSums(
+  balanco_final[, c(
+    "P", "ETP", "P_ETP", "ALT", "ETR", "DEF", "EXC"
+  )]
+)
+# Visualizar os totais
+totais_anuais
+```
+```{r}
+#=========================================================
+# 13. VERIFICAÇÃO DO FECHAMENTO DO BALANÇO HÍDRICO
+#=========================================================
+#---------------------------------------------------------
+# 13.1. CONFERIR A CONSERVAÇÃO DA ÁGUA
+#---------------------------------------------------------
+# A precipitação deve ser igual à soma da
+# evapotranspiração real, do excedente hídrico
+# e da alteração do armazenamento.
+#
+# P - ETR - EXC - ALT = 0
+
+fechamento <- sum(balanco$P) -
+  sum(balanco$ETR) -
+  sum(balanco$EXC) -
+  sum(balanco$ALT)
+
+fechamento
+
+
+#---------------------------------------------------------
+# 13.2. CONFERIR A DEFICIÊNCIA HÍDRICA
+#---------------------------------------------------------
+
+# A diferença entre ETP e ETR deve corresponder
+# à deficiência hídrica.
+#
+# ETP - ETR - DEF = 0
+
+conferencia_DEF <- sum(balanco$ETP) -
+  sum(balanco$ETR) -
+  sum(balanco$DEF)
+
+conferencia_DEF
+
+#---------------------------------------------------------
+# 13.3. CONFERIR A ALTERAÇÃO ANUAL DO ARMAZENAMENTO
+#---------------------------------------------------------
+# Em um ciclo climatológico fechado, a soma das
+# alterações mensais do armazenamento deve ser zero.
+
+conferencia_ALT <- sum(balanco$ALT)
+
+conferencia_ALT
+#=========================================================
+# 13.4. APRESENTAR OS RESULTADOS ARREDONDADOS
+#=========================================================
+
+round(fechamento, 6)
+
+round(conferencia_DEF, 6)
+
+round(conferencia_ALT, 6)
+```
+
+
+
+
